@@ -28,12 +28,17 @@ func main() {
 	}
 	defer database.Close()
 
-	// Initialize task queue
-	taskQueue := queue.NewTaskQueue()
+	// Initialize repositories
+	taskRepo := db.NewTaskRepository(database)
+	resultRepo := db.NewResultRepository(database)
+	linkRepo := db.NewLinkRepository(database)
 
 	// Initialize WebSocket hub
 	wsHub := websocket.NewHub()
 	go wsHub.Run()
+
+	// Initialize task queue with dependencies
+	taskQueue := queue.NewTaskQueue(taskRepo, resultRepo, linkRepo, wsHub)
 
 	// Initialize Gin router
 	r := gin.Default()

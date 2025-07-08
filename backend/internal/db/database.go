@@ -7,6 +7,7 @@ import (
 	"log"
 	"path/filepath"
 	"sort"
+	"time"
 	"web-crawler/config"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -267,6 +268,24 @@ func (r *TaskRepository) UpdateProgress(id int, progress float64) error {
 	return err
 }
 
+// UpdateStatusWithError updates the status and error message of a crawl task
+func (r *TaskRepository) UpdateStatusWithError(id int, status string, errorMessage *string) error {
+	_, err := r.db.Exec(
+		"UPDATE crawl_tasks SET status = ?, error_message = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+		status, errorMessage, id,
+	)
+	return err
+}
+
+// UpdateCompletedAt updates the completion time of a crawl task
+func (r *TaskRepository) UpdateCompletedAt(id int, completedAt *time.Time) error {
+	_, err := r.db.Exec(
+		"UPDATE crawl_tasks SET completed_at = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+		completedAt, id,
+	)
+	return err
+}
+
 // ResultRepository provides database operations for crawl results
 type ResultRepository struct {
 	db *sql.DB
@@ -318,4 +337,60 @@ func (r *ResultRepository) GetByTaskID(taskID int) (*CrawlResult, error) {
 	}
 
 	return &result, nil
+}
+
+// LinkRepository provides database operations for crawl links
+type LinkRepository struct {
+	db *sql.DB
+}
+
+// NewLinkRepository creates a new link repository
+func NewLinkRepository(database *sql.DB) *LinkRepository {
+	return &LinkRepository{db: database}
+}
+
+// Create creates a new crawl link
+func (r *LinkRepository) Create(link *CrawlLink) error {
+	result, err := r.db.Exec(
+		`INSERT INTO crawl_links (task_id, url, link_type, status_code, is_accessible, anchor_text, response_time_ms, checked_at) 
+		 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+		link.TaskID, link.URL, link.LinkType, link.StatusCode, link.IsAccessible, link.AnchorText, link.ResponseTimeMs, link.CheckedAt,
+	)
+	if err != nil {
+		return err
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return err
+	}
+
+	link.ID = int(id)
+	return nil
+}
+
+// GetByTaskID retrieves crawl links for a specific task
+func (r *LinkRepository) GetByTaskID(taskID int) ([]*CrawlLink, error) {
+	rows, err := r.db.Query(
+		`SELECT id, task_id, url, link_type, status_code, is_accessible, anchor_text, response_time_ms, checked_at, created_at 
+		 FROM crawl_links WHERE task_id = ? ORDER BY created_at`,
+		taskID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var links []*CrawlLink
+	for rows.Next() {
+		var link CrawlLink
+		err := rows.Scan(&link.ID, &link.TaskID, &link.URL, &link.LinkType, &link.StatusCode,
+			&link.IsAccessible, &link.AnchorText, &link.ResponseTimeMs, &link.CheckedAt, &link.CreatedAt)
+		if err != nil {
+			return nil, err
+		}
+		links = append(links, &link)
+	}
+
+	return links, nil
 }

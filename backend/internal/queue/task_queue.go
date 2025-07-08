@@ -3,21 +3,25 @@ package queue
 import (
 	"log"
 	"sync"
+	"web-crawler/internal/crawler"
 	"web-crawler/internal/db"
+	"web-crawler/internal/websocket"
 )
 
 // TaskQueue manages crawling tasks
 type TaskQueue struct {
-	mu       sync.RWMutex
-	tasks    map[int]*db.CrawlTask
-	stopChan map[int]chan bool
+	mu        sync.RWMutex
+	tasks     map[int]*db.CrawlTask
+	stopChan  map[int]chan bool
+	processor *crawler.Processor
 }
 
 // NewTaskQueue creates a new task queue
-func NewTaskQueue() *TaskQueue {
+func NewTaskQueue(taskRepo *db.TaskRepository, resultRepo *db.ResultRepository, linkRepo *db.LinkRepository, wsHub *websocket.Hub) *TaskQueue {
 	return &TaskQueue{
-		tasks:    make(map[int]*db.CrawlTask),
-		stopChan: make(map[int]chan bool),
+		tasks:     make(map[int]*db.CrawlTask),
+		stopChan:  make(map[int]chan bool),
+		processor: crawler.NewProcessor(taskRepo, resultRepo, linkRepo, wsHub),
 	}
 }
 
@@ -58,7 +62,7 @@ func (tq *TaskQueue) GetTask(taskID int) *db.CrawlTask {
 	return tq.tasks[taskID]
 }
 
-// processTask processes a single crawl task (placeholder implementation)
+// processTask processes a single crawl task using the crawler processor
 func (tq *TaskQueue) processTask(task *db.CrawlTask) {
 	taskID := task.ID
 	stopCh := tq.stopChan[taskID]
@@ -70,15 +74,12 @@ func (tq *TaskQueue) processTask(task *db.CrawlTask) {
 		tq.mu.Unlock()
 	}()
 
-	log.Printf("Starting to process task %d", taskID)
+	log.Printf("Starting to process task %d with crawler", taskID)
 
-	// This is a placeholder - actual crawling logic will be implemented later
-	select {
-	case <-stopCh:
-		log.Printf("Task %d was stopped", taskID)
-		return
-	default:
-		// Simulate some work
-		log.Printf("Task %d processing completed (placeholder)", taskID)
+	// Use the crawler processor to handle the task
+	if err := tq.processor.ProcessTask(task, stopCh); err != nil {
+		log.Printf("Failed to process task %d: %v", taskID, err)
+	} else {
+		log.Printf("Task %d processed successfully", taskID)
 	}
 }

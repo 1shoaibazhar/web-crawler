@@ -175,6 +175,43 @@ func (r *UserRepository) GetByID(id int) (*User, error) {
 	return &user, nil
 }
 
+// Create creates a new user
+func (r *UserRepository) Create(user *User) error {
+	result, err := r.db.Exec(
+		"INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)",
+		user.Username, user.Email, user.PasswordHash,
+	)
+	if err != nil {
+		return err
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return err
+	}
+
+	user.ID = int(id)
+	return nil
+}
+
+// GetByEmail retrieves a user by email
+func (r *UserRepository) GetByEmail(email string) (*User, error) {
+	var user User
+	err := r.db.QueryRow(
+		"SELECT id, username, email, password_hash, created_at, updated_at FROM users WHERE email = ?",
+		email,
+	).Scan(&user.ID, &user.Username, &user.Email, &user.PasswordHash, &user.CreatedAt, &user.UpdatedAt)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return &user, nil
+}
+
 // TaskRepository provides database operations for crawl tasks
 type TaskRepository struct {
 	db *sql.DB

@@ -112,7 +112,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
-	// Check if user already exists
+	// Check if user already exists by username
 	existingUser, err := h.userRepo.GetByUsername(req.Username)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -128,6 +128,22 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
+	// Check if user already exists by email
+	existingUserByEmail, err := h.userRepo.GetByEmail(req.Email)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Internal server error",
+		})
+		return
+	}
+
+	if existingUserByEmail != nil {
+		c.JSON(http.StatusConflict, gin.H{
+			"error": "Email already exists",
+		})
+		return
+	}
+
 	// Hash password
 	hashedPassword, err := auth.HashPassword(req.Password)
 	if err != nil {
@@ -137,17 +153,33 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
-	// Create new user (Note: We'll need to implement Create method in UserRepository)
+	// Create new user
 	user := &db.User{
 		Username:     req.Username,
 		Email:        req.Email,
 		PasswordHash: hashedPassword,
 	}
 
-	// For now, return success - we'll implement user creation in the next step
-	c.JSON(http.StatusCreated, gin.H{
-		"message": "User registration successful",
-		"user": UserInfo{
+	if err := h.userRepo.Create(user); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to create user account",
+		})
+		return
+	}
+
+	// Generate JWT token for the new user
+	token, err := h.jwtService.GenerateToken(user.ID, user.Username)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to generate token",
+		})
+		return
+	}
+
+	c.JSON(http.StatusCreated, TokenResponse{
+		Token: token,
+		User: &UserInfo{
+			ID:       user.ID,
 			Username: user.Username,
 			Email:    user.Email,
 		},

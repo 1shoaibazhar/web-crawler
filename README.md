@@ -17,6 +17,21 @@ A progressive web crawler application built with Go (Gin) backend and React fron
   - Broken link detection (4xx/5xx)
   - Login form presence detection
 
+## Quick Start with Docker (Recommended)
+
+The easiest way to get started is using Docker:
+
+```bash
+# Start the development environment
+./scripts/dev-start.sh
+
+# Access the application
+# - Backend API: http://localhost:8080
+# - Database Admin: http://localhost:8081
+```
+
+For detailed Docker setup instructions, see [Docker Setup Guide](docs/DOCKER_SETUP.md).
+
 ## Project Structure
 
 ```
@@ -34,8 +49,9 @@ web-crawler/
 │   ├── pkg/               # Public packages
 │   ├── migrations/        # Database migrations
 │   └── config/            # Configuration files
-├── frontend/              # React frontend application
+├── frontend/              # React frontend application (Future)
 ├── docker/                # Docker configuration
+├── scripts/               # Development scripts
 └── docs/                  # Documentation
 ```
 
@@ -49,20 +65,21 @@ web-crawler/
 - **WebSockets** - Real-time communication
 - **Docker** - Containerization
 
-### Frontend (Todo)
+### Frontend (Future)
 - **React** - Frontend framework
 - **WebSocket** - Real-time updates
 - **Material-UI** - UI components
 
-## Setup Instructions
+## Manual Setup (Alternative)
+
+If you prefer not to use Docker:
 
 ### Prerequisites
 - Go 1.21 or higher
 - MySQL 8.0 or higher
-- Docker (optional)
 
 ### Backend Setup
-1. Navigate to backend directory
+1. Navigate to backend directory: `cd backend`
 2. Install dependencies: `go mod download`
 3. Set up database and run migrations
 4. Start the server: `go run cmd/main.go`
@@ -80,13 +97,106 @@ SERVER_PORT=8080
 
 ## API Endpoints
 
-- `POST /api/auth/login` - User authentication
-- `POST /api/crawl` - Start crawling task
-- `GET /api/crawl/:id` - Get crawling status
-- `PUT /api/crawl/:id/stop` - Stop crawling task
-- `GET /api/crawl/:id/results` - Get crawling results
+### Authentication
+- `POST /api/v1/auth/login` - User authentication
+- `POST /api/v1/auth/register` - User registration
+- `POST /api/v1/auth/refresh` - Token refresh
+
+### User Management
+- `GET /api/v1/user/profile` - Get user profile
+- `PUT /api/v1/user/profile` - Update user profile
+
+### Crawling
+- `POST /api/v1/crawl` - Start crawling task
+- `GET /api/v1/crawl` - Get user's crawling tasks
+- `GET /api/v1/crawl/:id` - Get crawling status
+- `PUT /api/v1/crawl/:id/stop` - Stop crawling task
+- `GET /api/v1/crawl/:id/results` - Get crawling results
+- `DELETE /api/v1/crawl/:id` - Delete crawling task
+
+### Real-time
 - `WebSocket /ws` - Real-time updates
 
+## Development
+
+### Using Docker (Recommended)
+```bash
+# Start development environment
+./scripts/dev-start.sh
+
+# View logs
+docker-compose logs -f backend
+
+# Stop environment
+./scripts/dev-stop.sh
+
+# Reset database
+./scripts/dev-reset-db.sh
+```
+
+### Manual Development
+```bash
+# Install dependencies
+cd backend && go mod download
+
+# Run with hot reload (install air first)
+go install github.com/cosmtrek/air@latest
+air
+
+# Or run directly
+go run cmd/main.go
+```
+
+## Testing the API
+
+### Register a User
+```bash
+curl -X POST http://localhost:8080/api/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"username":"testuser","email":"test@example.com","password":"password123"}'
+```
+
+### Login
+```bash
+curl -X POST http://localhost:8080/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"testuser","password":"password123"}'
+```
+
+### Start Crawling (replace TOKEN)
+```bash
+curl -X POST http://localhost:8080/api/v1/crawl \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN" \
+  -d '{"url":"https://example.com"}'
+```
+
+## Development Workflow
+
+This project is developed in stages for proper git commit management:
+
+1. ✅ Project structure setup
+2. ✅ Database schema and connections
+3. ✅ Authentication system
+4. ✅ Basic API endpoints
+5. ✅ Web crawling logic
+6. ✅ Queue system
+7. ✅ Real-time updates
+8. ✅ Docker configuration
+9. 🔄 Testing and optimization
+10. 🔲 Frontend development
+
+## Default Users
+
+The system includes default users for testing:
+- **Username**: `admin`, **Password**: `password123`
+- **Username**: `testuser`, **Password**: `password123`
+
+## Documentation
+
+- [Docker Setup Guide](docs/DOCKER_SETUP.md) - Comprehensive Docker development setup
+- [API Documentation](docs/API.md) - Detailed API documentation (Coming soon)
+- [Frontend Guide](docs/FRONTEND.md) - Frontend development guide (Coming soon)
 
 ## License
 

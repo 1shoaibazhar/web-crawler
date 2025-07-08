@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: web-crawler-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: web_crawler
+      MYSQL_USER: crawler_user
+      MYSQL_PASSWORD: crawler_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # Backend API (Development mode with hot reload)
+  backend:
+    build:
+      context: .
+      dockerfile: ./docker/backend/Dockerfile.dev
+    container_name: web-crawler-backend
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: crawler_user
+      DB_PASSWORD: crawler_password
+      DB_NAME: web_crawler
+      JWT_SECRET: dev-jwt-secret-key-change-this
+      SERVER_PORT: 8080
+      GIN_MODE: debug
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Adminer (Database management tool)
+  adminer:
+    image: adminer
+    container_name: web-crawler-adminer
+    ports:
+      - "8081:8080"
+    restart: unless-stopped
+    environment:
+      ADMINER_DEFAULT_SERVER: mysql
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  default:
+    name: web-crawler-network 

@@ -3,7 +3,8 @@ package main
 import (
 	"log"
 	"net/http"
-	"os"
+	"strconv"
+	"web-crawler/config"
 	"web-crawler/internal/api"
 	"web-crawler/internal/db"
 	"web-crawler/internal/middleware"
@@ -43,7 +44,7 @@ func main() {
 	// Health check endpoint
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
-			"status": "healthy",
+			"status":  "healthy",
 			"service": "web-crawler",
 		})
 	})
@@ -56,12 +57,10 @@ func main() {
 		websocket.ServeWS(wsHub, c.Writer, c.Request)
 	})
 
-	// Get port from environment or use default
-	port := os.Getenv("SERVER_PORT")
-	if port == "" {
-		port = "8080"
-	}
+	// Get port from config
+	cfg := config.Load()
+	port := strconv.Itoa(cfg.Server.Port)
 
 	log.Printf("Server starting on port %s", port)
 	log.Fatal(r.Run(":" + port))
-} 
+}

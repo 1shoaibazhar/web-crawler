@@ -40,11 +40,4 @@ export interface FilterConfig {
 
 export type LoadingState = 'idle' | 'loading' | 'success' | 'error';
 
-export interface WebSocketMessage {
-  type: 'progress_update' | 'results_update' | 'error';
-  task_id?: number;
-  progress?: number;
-  message?: string;
-  results?: any;
-  error?: string;
-} 
+ 

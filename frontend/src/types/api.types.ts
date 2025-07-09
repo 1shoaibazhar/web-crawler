@@ -116,3 +116,37 @@ export interface StatsResponse {
   totalLinks: number;
   averageResponseTime: number;
 } 
+
+// WebSocket Configuration
+export interface WebSocketConfig {
+  url: string;
+  reconnectAttempts?: number;
+  reconnectDelay?: number;
+  maxReconnectDelay?: number;
+  heartbeatInterval?: number;
+}
+
+// WebSocket Event Map
+export interface WebSocketEventMap {
+  connect: void;
+  disconnect: { code: number; reason: string };
+  error: any;
+  message: WebSocketMessage;
+  crawl_progress: any;
+  crawl_started: any;
+  crawl_completed: any;
+  crawl_failed: { task: any; error: string };
+  crawl_stopped: any;
+  heartbeat: any;
+  progress_update: any;
+  results_update: any;
+  'state-change': any;
+}
+
+// WebSocket Message Types
+export interface WebSocketMessage {
+  type: 'error' | 'progress_update' | 'results_update' | 'crawl_progress' | 'crawl_started' | 'crawl_completed' | 'crawl_failed' | 'crawl_stopped' | 'heartbeat';
+  data?: any;
+  timestamp?: number;
+  task_id?: number;
+} 

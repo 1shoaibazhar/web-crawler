@@ -34,7 +34,7 @@ export type {
   TaskStatusResponse,
   CrawlTasksResponse 
 } from '../types/crawl.types';
-export type { WebSocketMessage } from '../types/common.types';
+export type { WebSocketMessage } from '../types/api.types';
 
 // Service configuration
 export const SERVICES_CONFIG = {

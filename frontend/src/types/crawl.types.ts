@@ -91,4 +91,34 @@ export interface HeadingCounts {
   h4: number;
   h5: number;
   h6: number;
+}
+
+// Real-time crawl progress information
+export interface CrawlProgress {
+  task_id: number;
+  url: string;
+  status: TaskStatus;
+  progress: {
+    urls_crawled: number;
+    total_urls: number;
+    percentage: number;
+    current_url?: string;
+    urls_found: number;
+    errors: number;
+    start_time: string;
+    elapsed_time: number;
+    estimated_time_remaining?: number;
+  };
+  statistics: {
+    pages_crawled: number;
+    links_found: number;
+    external_links: number;
+    internal_links: number;
+    broken_links: number;
+    redirects: number;
+    errors: number;
+    average_response_time: number;
+    total_size: number;
+  };
+  timestamp: string;
 } 

@@ -26,15 +26,40 @@ export interface RegisterRequest {
 }
 
 export interface TokenResponse {
-  token: string;
+  access_token: string;
+  refresh_token?: string;
+  token_type?: string;
+  expires_in?: number;
   user: UserInfo;
 }
 
 export interface RefreshTokenRequest {
-  token: string;
+  refresh_token: string;
 }
 
 export interface RefreshTokenResponse {
+  access_token: string;
+  refresh_token?: string;
+  token_type?: string;
+  expires_in?: number;
+}
+
+export interface ChangePasswordRequest {
+  current_password: string;
+  new_password: string;
+  confirm_password: string;
+}
+
+export interface PasswordResetRequest {
+  email: string;
+}
+
+export interface PasswordResetConfirmRequest {
+  token: string;
+  new_password: string;
+}
+
+export interface EmailVerificationRequest {
   token: string;
 }
 
@@ -47,4 +72,27 @@ export interface AuthContextType {
   refreshToken: () => Promise<void>;
   isLoading: boolean;
   isAuthenticated: boolean;
+}
+
+export interface AuthState {
+  user: UserInfo | null;
+  token: string | null;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+  error: string | null;
+}
+
+export interface AuthHookResult {
+  user: UserInfo | null;
+  token: string | null;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+  error: string | null;
+  login: (credentials: LoginRequest) => Promise<void>;
+  register: (data: RegisterRequest) => Promise<void>;
+  logout: () => Promise<void>;
+  refreshToken: () => Promise<void>;
+  updateProfile: (data: Partial<UserInfo>) => Promise<void>;
+  changePassword: (data: ChangePasswordRequest) => Promise<void>;
+  clearError: () => void;
 } 

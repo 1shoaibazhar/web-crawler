@@ -4,6 +4,7 @@ export interface ApiError {
   error: string;
   message?: string;
   status?: number;
+  code?: string;
 }
 
 export interface ApiConfig {
@@ -25,8 +26,10 @@ export interface ApiEndpoints {
   login: string;
   register: string;
   refreshToken: string;
+  logout: string;
   profile: string;
   updateProfile: string;
+  changePassword: string;
   
   // Crawl endpoints
   startCrawl: string;
@@ -34,10 +37,21 @@ export interface ApiEndpoints {
   getTaskStatus: (id: number) => string;
   stopCrawl: (id: number) => string;
   getResults: (id: number) => string;
+  getLinks: (id: number) => string;
   deleteTask: (id: number) => string;
+  bulkDelete: string;
+  bulkRerun: string;
+  
+  // Statistics endpoints
+  getStats: string;
+  getUserStats: string;
   
   // WebSocket endpoint
   websocket: string;
+  
+  // Health endpoints
+  health: string;
+  version: string;
 }
 
 export interface PaginationParams {
@@ -67,4 +81,38 @@ export interface ApiClient {
   put<T>(url: string, data?: any, config?: RequestConfig): Promise<T>;
   delete<T>(url: string, config?: RequestConfig): Promise<T>;
   patch<T>(url: string, data?: any, config?: RequestConfig): Promise<T>;
+}
+
+export interface UploadProgressCallback {
+  (progress: number): void;
+}
+
+export interface HealthCheckResponse {
+  status: string;
+  timestamp: string;
+}
+
+export interface VersionResponse {
+  version: string;
+  build: string;
+}
+
+export interface BulkActionRequest {
+  taskIds: number[];
+}
+
+export interface BulkActionResponse {
+  success: boolean;
+  processed: number;
+  failed: number;
+  errors?: string[];
+}
+
+export interface StatsResponse {
+  totalTasks: number;
+  completedTasks: number;
+  failedTasks: number;
+  totalPages: number;
+  totalLinks: number;
+  averageResponseTime: number;
 } 

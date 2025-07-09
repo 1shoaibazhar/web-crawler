@@ -1,7 +1,7 @@
 // Crawl service for crawling operations
 
 import { apiService, API_ENDPOINTS } from './api.service';
-import { 
+import type { 
   CrawlTask, 
   CrawlResult, 
   CrawlLink, 

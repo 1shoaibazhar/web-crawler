@@ -1,15 +1,14 @@
 // Base API service with axios configuration and interceptors
 
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { ApiConfig, ApiError, ApiEndpoints } from '../types';
+import axios from 'axios';
+import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import type { ApiConfig, ApiError, ApiEndpoints } from '../types';
 import { StorageService } from './storage.service';
 
 export class ApiService {
   private client: AxiosInstance;
-  private baseURL: string;
 
   constructor(config: ApiConfig) {
-    this.baseURL = config.baseURL;
     this.client = axios.create({
       baseURL: config.baseURL,
       timeout: config.timeout,

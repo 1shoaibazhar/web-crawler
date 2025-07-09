@@ -1,11 +1,10 @@
 // Auth service for authentication operations
 
 import { apiService, API_ENDPOINTS } from './api.service';
-import { 
+import type { 
   LoginRequest, 
   RegisterRequest, 
   TokenResponse, 
-  RefreshTokenRequest, 
   RefreshTokenResponse, 
   UserInfo 
 } from '../types';

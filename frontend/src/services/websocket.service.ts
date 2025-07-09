@@ -1,6 +1,6 @@
 // WebSocket service for real-time updates
 
-import { WebSocketMessage } from '../types';
+import type { WebSocketMessage } from '../types';
 
 export class WebSocketService {
   private ws: WebSocket | null = null;
@@ -8,8 +8,11 @@ export class WebSocketService {
   private maxReconnectAttempts = 5;
   private reconnectDelay = 1000;
   private listeners: { [key: string]: Function[] } = {};
+  private url: string;
 
-  constructor(private url: string) {}
+  constructor(url: string) {
+    this.url = url;
+  }
 
   connect(): void {
     try {

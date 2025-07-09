@@ -129,7 +129,7 @@ export const toKebabCase = (str: string): string => {
 
 // Convert kebab-case to camelCase
 export const toCamelCase = (str: string): string => {
-  return str.replace(/-([a-z])/g, (match, letter) => letter.toUpperCase());
+  return str.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
 };
 
 // Safe JSON parse

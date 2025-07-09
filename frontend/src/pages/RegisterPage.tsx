@@ -1,24 +1,16 @@
 import React from 'react';
-import { AuthLayout } from '../components/auth/AuthLayout';
 import { RegisterForm } from '../components/auth/RegisterForm';
+import { AuthLayout } from '../components/auth/AuthLayout';
+import type { RegisterRequest } from '../types';
 
 export const RegisterPage: React.FC = () => {
-  const handleRegister = (data: { email: string; password: string; confirmPassword: string }) => {
-    // TODO: Implement registration logic
-    console.log('Registration submitted:', data);
+  const handleRegister = (data: RegisterRequest) => {
+    console.log('Register data:', data);
   };
 
   return (
-    <AuthLayout title="Sign Up">
+    <AuthLayout title="Create Account">
       <RegisterForm onSubmit={handleRegister} />
-      <div className="text-center mt-4">
-        <p className="text-sm text-gray-600">
-          Already have an account?{' '}
-          <a href="/login" className="text-blue-600 hover:text-blue-500">
-            Sign in
-          </a>
-        </p>
-      </div>
     </AuthLayout>
   );
 };

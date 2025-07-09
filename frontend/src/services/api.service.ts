@@ -4,7 +4,7 @@ import axios from 'axios';
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import type { ApiConfig, ApiError, ApiEndpoints } from '../types';
 import { StorageService } from './storage.service';
-import { retry, sleep } from '../utils';
+import { retry } from '../utils';
 
 export class ApiService {
   private client: AxiosInstance;
@@ -119,9 +119,10 @@ export class ApiService {
   }
 
   private handleError(error: AxiosError): ApiError {
+    const responseData = error.response?.data as any;
     const apiError: ApiError = {
-      error: error.response?.data?.error || error.name || 'Network error',
-      message: error.response?.data?.message || error.message || 'An unexpected error occurred',
+      error: responseData?.error || error.name || 'Network error',
+      message: responseData?.message || error.message || 'An unexpected error occurred',
       status: error.response?.status,
       code: error.code,
     };

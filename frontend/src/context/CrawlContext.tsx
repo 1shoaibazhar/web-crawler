@@ -26,8 +26,8 @@ interface CrawlProviderProps {
 }
 
 export const CrawlProvider: React.FC<CrawlProviderProps> = ({ children }) => {
-  const [tasks, setTasks] = useState<CrawlTask[]>([]);
-  const [activeTasks, setActiveTasks] = useState<CrawlTask[]>([]);
+  const [tasks, _setTasks] = useState<CrawlTask[]>([]);
+  const [activeTasks, _setActiveTasks] = useState<CrawlTask[]>([]);
 
   const startCrawl = async (url: string, options?: any) => {
     // TODO: Implement start crawl logic

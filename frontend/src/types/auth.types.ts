@@ -95,4 +95,18 @@ export interface AuthHookResult {
   updateProfile: (data: Partial<UserInfo>) => Promise<void>;
   changePassword: (data: ChangePasswordRequest) => Promise<void>;
   clearError: () => void;
+  
+  // Enhanced functions with navigation
+  loginWithRedirect: (credentials: LoginRequest, redirectTo?: string) => Promise<void>;
+  registerWithRedirect: (data: RegisterRequest, redirectTo?: string) => Promise<void>;
+  logoutWithRedirect: (redirectTo?: string) => Promise<void>;
+  
+  // Utility functions
+  hasRole: (role: string) => boolean;
+  isAdmin: () => boolean;
+  getUserDisplayName: () => string;
+  isTokenExpiring: () => boolean;
+  getTokenExpiresIn: () => number;
+  forceRefreshToken: () => Promise<void>;
+  checkAuthStatus: () => Promise<boolean>;
 } 

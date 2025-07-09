@@ -25,8 +25,8 @@ interface WebSocketProviderProps {
 
 export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }) => {
   const [isConnected, setIsConnected] = useState(false);
-  const [lastMessage, setLastMessage] = useState<any>(null);
-  const [socket, setSocket] = useState<WebSocket | null>(null);
+  const [lastMessage, _setLastMessage] = useState<any>(null);
+  const [_socket, _setSocket] = useState<WebSocket | null>(null);
 
   const connect = () => {
     // TODO: Implement WebSocket connection logic

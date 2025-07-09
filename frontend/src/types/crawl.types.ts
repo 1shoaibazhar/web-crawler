@@ -76,10 +76,7 @@ export interface CrawlTasksResponse {
   total: number;
 }
 
-export interface BulkActionRequest {
-  task_ids: number[];
-  action: 'delete' | 'restart';
-}
+
 
 export interface ChartData {
   name: string;

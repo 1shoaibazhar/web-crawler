@@ -1,39 +1,36 @@
-# Web Crawler Application
+# Web Crawler
 
-A progressive web crawler application built with Go (Gin) backend and React frontend.
+A modern web crawler that helps you analyze websites efficiently. Built with Go and React, it provides real-time crawling with a beautiful interface.
 
-## Features
+## What it does
 
-- **Progressive Web Crawling**: Crawl websites with real-time progress tracking
-- **Start/Stop Control**: Ability to start and stop crawling tasks
-- **Queue System**: Handle multiple crawling tasks in queue
-- **Real-time Updates**: WebSocket-based status updates
-- **Authentication**: JWT-based authentication system
-- **Modern Web Interface**: React frontend with responsive design
-- **Bulk Operations**: Select and manage multiple tasks at once
-- **Comprehensive Analysis**: 
-  - HTML version detection
-  - Page title extraction
-  - Heading tag counts (H1, H2, etc.)
-  - Internal vs external link analysis
-  - Broken link detection (4xx/5xx)
-  - Login form presence detection
+- **Smart Crawling**: Crawl websites with real-time progress updates
+- **Task Management**: Start, stop, and monitor multiple crawling tasks
+- **Real-time Updates**: See progress as it happens with WebSocket connections
+- **User Authentication**: Secure login system to keep your data private
+- **Beautiful Interface**: Modern React frontend that works on all devices
+- **Bulk Operations**: Manage multiple tasks at once
+- **Detailed Analysis**: Get insights like:
+  - Page titles and structure
+  - Internal vs external links
+  - Broken links detection
+  - HTML version information
+  - Form detection
 
-## Quick Start with Docker (Recommended)
+## Getting Started
 
-The easiest way to get started is using Docker:
+The easiest way to get up and running is with Docker:
 
 ```bash
-# Start the development environment
+# Start everything up
 ./scripts/dev-start.sh
 
-# Access the application
-# - Frontend App: http://localhost:3000
-# - Backend API: http://localhost:8080
-# - Database Admin: http://localhost:8081
+# Open your browser to:
+# - Web App: http://localhost:3000
+# - API: http://localhost:8080
 ```
 
-For detailed Docker setup instructions, see [Docker Setup Guide](docs/DOCKER_SETUP.md).
+Need more details? Check out our [Docker Setup Guide](docs/DOCKER_SETUP.md).
 
 ## Project Structure
 
@@ -86,27 +83,33 @@ web-crawler/
 - **React Router** - Client-side routing
 - **WebSocket** - Real-time updates
 
-## Manual Setup (Alternative)
+## Manual Setup
 
-If you prefer not to use Docker:
+Prefer to set things up manually? Here's how:
 
-### Prerequisites
+### What you'll need
 - Go 1.21 or higher
 - Node.js 18 or higher
 - MySQL 8.0 or higher
 
-### Backend Setup
-1. Navigate to backend directory: `cd backend`
-2. Install dependencies: `go mod download`
-3. Set up database and run migrations
-4. Start the server: `go run cmd/main.go`
+### Backend
+```bash
+cd backend
+go mod download
+# Set up your database and run migrations
+go run cmd/main.go
+```
 
-### Frontend Setup
-1. Navigate to frontend directory: `cd frontend`
-2. Install dependencies: `npm install`
-3. Start the development server: `npm run dev`
+### Frontend
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
 ### Environment Variables
+You'll need to set these up:
+
 ```bash
 # Backend
 DB_HOST=localhost
@@ -146,23 +149,23 @@ VITE_WS_URL=ws://localhost:8080
 
 ## Development
 
-### Using Docker (Recommended)
+### Docker Development
 ```bash
-# Start development environment
+# Start everything
 ./scripts/dev-start.sh
 
-# View logs
+# Check logs
 docker-compose logs -f backend
 docker-compose logs -f frontend
 
-# Stop environment
+# Stop everything
 ./scripts/dev-stop.sh
 
-# Reset database
+# Reset the database
 ./scripts/dev-reset-db.sh
 ```
 
-### Manual Development
+### Local Development
 ```bash
 # Backend
 cd backend && go mod download
@@ -173,57 +176,38 @@ cd frontend && npm install
 npm run dev
 ```
 
-## Testing the Application
+## Try it out
 
-### Using the Web Interface
+### Web Interface
 1. Open http://localhost:3000 in your browser
-2. Register a new account or use the default credentials
-3. Start creating crawl tasks and monitor their progress
+2. Create an account or use the default credentials below
+3. Start crawling and watch the magic happen!
 
-### Using the API
+### API Examples
 ```bash
-# Register a User
+# Create a user
 curl -X POST http://localhost:8080/api/v1/auth/register \
   -H "Content-Type: application/json" \
   -d '{"username":"testuser","email":"test@example.com","password":"password123"}'
 
-# Login
+# Log in
 curl -X POST http://localhost:8080/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username":"testuser","password":"password123"}'
 
-# Start Crawling (replace TOKEN)
+# Start crawling (replace TOKEN with your actual token)
 curl -X POST http://localhost:8080/api/v1/crawl \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer TOKEN" \
   -d '{"url":"https://example.com"}'
 ```
 
-## Development Workflow
-
-This project is developed in stages for proper git commit management:
-
-1. ✅ Project structure setup
-2. ✅ Database schema and connections
-3. ✅ Authentication system
-4. ✅ Basic API endpoints
-5. ✅ Web crawling logic
-6. ✅ Queue system
-7. ✅ Real-time updates
-8. ✅ Docker configuration
-9. ✅ Frontend development
-10. ✅ Error handling & notifications
-11. ✅ Responsive design
-12. 🔄 Testing and optimization
-
 ## Default Users
 
-The system includes default users for testing:
+Ready to test? Use these accounts:
 - **Username**: `admin`, **Password**: `password123`
 - **Username**: `testuser`, **Password**: `password123`
 
 ## Documentation
 
-- [Docker Setup Guide](docs/DOCKER_SETUP.md) - Comprehensive Docker development setup
-- [API Documentation](docs/API.md) - Detailed API documentation (Coming soon)
-- [Frontend Guide](docs/FRONTEND.md) - Frontend development guide (Coming soon) 
+- [Docker Setup Guide](docs/DOCKER_SETUP.md) - Comprehensive Docker development setup 

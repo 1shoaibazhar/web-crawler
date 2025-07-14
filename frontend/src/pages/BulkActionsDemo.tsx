@@ -1,6 +1,5 @@
 import React, { useState, useCallback } from 'react';
 import { Layout } from '../components/common/Layout';
-import { Header } from '../components/common/Layout';
 import { BulkActions } from '../components/dashboard/BulkActions';
 import { CrawlResultsTable } from '../components/dashboard/CrawlResultsTable';
 import { Button } from '../components/common/Button';
@@ -46,12 +45,7 @@ export const BulkActionsDemo: React.FC = () => {
           created_at: '2024-01-01T10:00:00Z',
           updated_at: '2024-01-01T10:30:00Z',
           user_id: 1,
-          depth: 2,
-          delay: 1000,
-          timeout: 30000,
           progress: 100,
-          links_found: 25,
-          links_crawled: 25,
           error_message: undefined,
         },
         {
@@ -61,12 +55,7 @@ export const BulkActionsDemo: React.FC = () => {
           created_at: '2024-01-01T11:00:00Z',
           updated_at: '2024-01-01T11:15:00Z',
           user_id: 1,
-          depth: 1,
-          delay: 500,
-          timeout: 30000,
           progress: 45,
-          links_found: 12,
-          links_crawled: 5,
           error_message: undefined,
         },
         {
@@ -76,12 +65,7 @@ export const BulkActionsDemo: React.FC = () => {
           created_at: '2024-01-01T12:00:00Z',
           updated_at: '2024-01-01T12:05:00Z',
           user_id: 1,
-          depth: 1,
-          delay: 1000,
-          timeout: 30000,
           progress: 0,
-          links_found: 0,
-          links_crawled: 0,
           error_message: 'Connection timeout',
         },
         {
@@ -91,12 +75,7 @@ export const BulkActionsDemo: React.FC = () => {
           created_at: '2024-01-01T13:00:00Z',
           updated_at: '2024-01-01T13:00:00Z',
           user_id: 1,
-          depth: 2,
-          delay: 1000,
-          timeout: 30000,
           progress: 0,
-          links_found: 0,
-          links_crawled: 0,
           error_message: undefined,
         },
       ];
@@ -262,9 +241,7 @@ export const BulkActionsDemo: React.FC = () => {
   }, []);
 
   return (
-    <Layout
-      header={<Header title="Bulk Actions Demo" user={mockUser} onLogout={handleLogout} />}
-    >
+    <Layout>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">

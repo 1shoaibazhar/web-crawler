@@ -1,17 +1,24 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { DashboardStats } from '../components/dashboard/DashboardStats';
-import { CrawlResultsTable } from '../components/dashboard/CrawlResultsTable';
-import { Button } from '../components/common/Button';
-import { Loading } from '../components/common/Loading';
-import { ErrorMessage } from '../components/common/ErrorMessage';
-import { WebSocketStatus } from '../components/common/WebSocketStatus';
-import { ResponsiveLayout, ResponsiveSection } from '../components/common/ResponsiveLayout';
-import { crawlService } from '../services';
-import { useAuth } from '../hooks/useAuth';
-import { useWebSocket } from '../hooks/useWebSocket';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
-import { RefreshCw, Download, Plus, Eye, Play, Trash2 } from 'lucide-react';
-import type { CrawlTask, TasksQueryParams } from '../types';
+import { useWebSocket } from '../hooks/useWebSocket';
+import { ResponsiveLayout, ResponsiveSection } from '../components/common/ResponsiveLayout';
+import { CrawlResultsTable } from '../components/dashboard/CrawlResultsTable';
+import { DashboardStats } from '../components/dashboard/DashboardStats';
+import { WebSocketStatus } from '../components/common/WebSocketStatus';
+import { Button } from '../components/common/Button';
+import { ErrorMessage } from '../components/common/ErrorMessage';
+import { crawlService } from '../services/crawl.service';
+import { 
+  RefreshCw, 
+  Download, 
+  Plus, 
+  Eye, 
+  Play, 
+  Trash2 
+} from 'lucide-react';
+import type { CrawlTask, TaskStatus, TasksQueryParams } from '../types';
 
 export const ResultsDashboard: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
@@ -265,7 +272,9 @@ export const ResultsDashboard: React.FC = () => {
               </Button>
             </div>
           }
-        />
+        >
+          <div></div>
+        </ResponsiveSection>
 
         {/* Error Display */}
         {error && <ErrorMessage message={error} />}

@@ -7,6 +7,7 @@ import { SettingsProvider } from './context/SettingsContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { NotificationContainer } from './components/common/NotificationContainer';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
+import { AppLayout } from './components/layout/AppLayout';
 import { 
   LoginPage, 
   RegisterPage, 
@@ -35,7 +36,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode; roles?: string[] }> 
   //   return <Navigate to="/dashboard" replace />;
   // }
 
-  return <>{children}</>;
+  return <AppLayout>{children}</AppLayout>;
 };
 
 // Public Route Component (redirects to dashboard if already authenticated)

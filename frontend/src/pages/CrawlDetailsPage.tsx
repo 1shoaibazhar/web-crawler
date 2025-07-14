@@ -12,7 +12,7 @@ import { useWebSocket } from '../hooks/useWebSocket';
 import type { CrawlTask, CrawlResult, CrawlLink, TaskStatusResponse } from '../types';
 
 export const CrawlDetailsPage: React.FC = () => {
-  const { taskId } = useParams<{ taskId: string }>();
+  const { id: taskId } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const { isConnected: wsConnected } = useWebSocket();
@@ -70,7 +70,7 @@ export const CrawlDetailsPage: React.FC = () => {
       if (taskStatus.status === 'completed') {
         const [resultsData, linksData] = await Promise.all([
           crawlService.getResults(taskIdNumber),
-          crawlService.getLinks(taskIdNumber, { limit: 1000 }) // Get all links
+          crawlService.getLinks(taskIdNumber) // Fetch all links
         ]);
         
         setResults(resultsData);

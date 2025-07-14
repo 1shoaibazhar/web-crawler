@@ -55,7 +55,7 @@ func main() {
 	})
 
 	// API routes
-	api.SetupRoutes(r, database, taskQueue, wsHub)
+	api.SetupRoutes(r, database, taskQueue, wsHub, linkRepo)
 
 	// WebSocket endpoint
 	r.GET("/ws", func(c *gin.Context) {

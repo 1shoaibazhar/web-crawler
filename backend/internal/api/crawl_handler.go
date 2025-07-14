@@ -14,15 +14,17 @@ import (
 type CrawlHandler struct {
 	taskRepo   *db.TaskRepository
 	resultRepo *db.ResultRepository
+	linkRepo   *db.LinkRepository
 	taskQueue  *queue.TaskQueue
 	wsHub      *websocket.Hub
 }
 
 // NewCrawlHandler creates a new crawl handler
-func NewCrawlHandler(taskRepo *db.TaskRepository, resultRepo *db.ResultRepository, taskQueue *queue.TaskQueue, wsHub *websocket.Hub) *CrawlHandler {
+func NewCrawlHandler(taskRepo *db.TaskRepository, resultRepo *db.ResultRepository, linkRepo *db.LinkRepository, taskQueue *queue.TaskQueue, wsHub *websocket.Hub) *CrawlHandler {
 	return &CrawlHandler{
 		taskRepo:   taskRepo,
 		resultRepo: resultRepo,
+		linkRepo:   linkRepo,
 		taskQueue:  taskQueue,
 		wsHub:      wsHub,
 	}
@@ -346,4 +348,37 @@ func (h *CrawlHandler) DeleteTask(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Task deletion scheduled",
 	})
+}
+
+// GetLinks retrieves all links for a specific crawl task
+func (h *CrawlHandler) GetLinks(c *gin.Context) {
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+	taskID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid task ID"})
+		return
+	}
+	task, err := h.taskRepo.GetByID(taskID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve task"})
+		return
+	}
+	if task == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Task not found"})
+		return
+	}
+	if task.UserID != userID.(int) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Access denied"})
+		return
+	}
+	links, err := h.linkRepo.GetByTaskID(taskID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve links"})
+		return
+	}
+	c.JSON(http.StatusOK, links)
 }

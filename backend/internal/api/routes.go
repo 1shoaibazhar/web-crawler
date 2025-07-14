@@ -11,7 +11,7 @@ import (
 )
 
 // SetupRoutes configures all API routes
-func SetupRoutes(r *gin.Engine, database *sql.DB, taskQueue *queue.TaskQueue, wsHub *websocket.Hub) {
+func SetupRoutes(r *gin.Engine, database *sql.DB, taskQueue *queue.TaskQueue, wsHub *websocket.Hub, linkRepo *db.LinkRepository) {
 	// Initialize repositories
 	userRepo := db.NewUserRepository(database)
 	taskRepo := db.NewTaskRepository(database)
@@ -19,7 +19,7 @@ func SetupRoutes(r *gin.Engine, database *sql.DB, taskQueue *queue.TaskQueue, ws
 
 	// Initialize handlers
 	authHandler := NewAuthHandler(userRepo)
-	crawlHandler := NewCrawlHandler(taskRepo, resultRepo, taskQueue, wsHub)
+	crawlHandler := NewCrawlHandler(taskRepo, resultRepo, linkRepo, taskQueue, wsHub)
 
 	// API v1 group
 	v1 := r.Group("/api/v1")
@@ -54,6 +54,7 @@ func SetupRoutes(r *gin.Engine, database *sql.DB, taskQueue *queue.TaskQueue, ws
 				crawl.PUT("/:id/stop", crawlHandler.StopCrawl)
 				crawl.GET("/:id/results", crawlHandler.GetResults)
 				crawl.DELETE("/:id", crawlHandler.DeleteTask)
+				crawl.GET("/:id/links", crawlHandler.GetLinks)
 			}
 		}
 	}

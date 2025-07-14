@@ -112,7 +112,9 @@ export const DashboardPage: React.FC = () => {
         <ResponsiveSection
           title="Dashboard"
           subtitle="Overview of your web crawling activities and performance"
-        />
+        >
+          <div></div>
+        </ResponsiveSection>
 
         {/* Error Display */}
         {error && <ErrorMessage message={error} />}

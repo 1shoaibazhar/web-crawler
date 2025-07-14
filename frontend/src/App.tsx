@@ -1,49 +1,115 @@
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { CrawlProvider } from './context/CrawlContext';
 import { WebSocketProvider } from './context/WebSocketContext';
-import { ProtectedRoute } from './components/auth/ProtectedRoute';
-import { Layout } from './components/common/Layout';
-import { LoginPage, RegisterPage, UrlManagement, ResultsDashboard, CrawlDetailsPage } from './pages';
-import './App.css';
+import { 
+  LoginPage, 
+  RegisterPage, 
+  DashboardPage, 
+  UrlManagement, 
+  ResultsDashboard, 
+  CrawlDetailsPage,
+  WebSocketDemo,
+  BulkActionsDemo
+} from './pages';
 
-// Protected layout wrapper
-const ProtectedLayout = () => {
+// Protected Route Component
+const ProtectedRoute: React.FC<{ children: React.ReactNode; roles?: string[] }> = ({ 
+  children, 
+  roles = ['user', 'admin'] 
+}) => {
+  const { isAuthenticated } = useAuth();
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // TODO: Add role-based access control when user roles are implemented
+  // if (roles && user && !roles.includes(user.role)) {
+  //   return <Navigate to="/dashboard" replace />;
+  // }
+
+  return <>{children}</>;
+};
+
+// Public Route Component (redirects to dashboard if already authenticated)
+const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isAuthenticated } = useAuth();
+
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <>{children}</>;
+};
+
+const AppRoutes: React.FC = () => {
   return (
-    <ProtectedRoute>
-      <Layout>
-        <Outlet />
-      </Layout>
-    </ProtectedRoute>
+    <Routes>
+      {/* Public Routes */}
+      <Route path="/login" element={
+        <PublicRoute>
+          <LoginPage />
+        </PublicRoute>
+      } />
+      <Route path="/register" element={
+        <PublicRoute>
+          <RegisterPage />
+        </PublicRoute>
+      } />
+
+      {/* Protected Routes */}
+      <Route path="/dashboard" element={
+        <ProtectedRoute>
+          <DashboardPage />
+        </ProtectedRoute>
+      } />
+      <Route path="/url-management" element={
+        <ProtectedRoute>
+          <UrlManagement />
+        </ProtectedRoute>
+      } />
+      <Route path="/results" element={
+        <ProtectedRoute>
+          <ResultsDashboard />
+        </ProtectedRoute>
+      } />
+      <Route path="/crawl/:id" element={
+        <ProtectedRoute>
+          <CrawlDetailsPage />
+        </ProtectedRoute>
+      } />
+      <Route path="/websocket-demo" element={
+        <ProtectedRoute>
+          <WebSocketDemo />
+        </ProtectedRoute>
+      } />
+      <Route path="/bulk-actions-demo" element={
+        <ProtectedRoute>
+          <BulkActionsDemo />
+        </ProtectedRoute>
+      } />
+
+      {/* Default redirect */}
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+    </Routes>
   );
 };
 
-function App() {
+const App: React.FC = () => {
   return (
-    <AuthProvider>
-      <WebSocketProvider>
-        <Router>
-          <div className="min-h-screen bg-gray-50">
-            <Routes>
-              {/* Public routes */}
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-              
-              {/* Protected routes */}
-              <Route path="/" element={<ProtectedLayout />}>
-                <Route index element={<Navigate to="/url-management" replace />} />
-                <Route path="url-management" element={<UrlManagement />} />
-                <Route path="results" element={<ResultsDashboard />} />
-                <Route path="results/:taskId" element={<CrawlDetailsPage />} />
-              </Route>
-              
-              {/* Catch all route */}
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </div>
-        </Router>
-      </WebSocketProvider>
-    </AuthProvider>
+    <Router>
+      <AuthProvider>
+        <WebSocketProvider>
+          <CrawlProvider>
+            <AppRoutes />
+          </CrawlProvider>
+        </WebSocketProvider>
+      </AuthProvider>
+    </Router>
   );
-}
+};
 
 export default App;

@@ -120,6 +120,45 @@ export class CrawlService {
     }
   }
 
+  async bulkStop(taskIds: number[]): Promise<BulkActionResponse> {
+    try {
+      const response = await apiService.post<BulkActionResponse>(
+        API_ENDPOINTS.bulkStop,
+        { taskIds } as BulkActionRequest
+      );
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async bulkExport(taskIds: number[], format: 'csv' | 'json' | 'xlsx' = 'csv'): Promise<Blob> {
+    try {
+      const response = await apiService.client.post(
+        `/api/v1/crawl/bulk-export?format=${format}`,
+        { taskIds } as BulkActionRequest,
+        {
+          responseType: 'blob',
+        }
+      );
+
+      // Trigger download
+      const blob = new Blob([response.data]);
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = `bulk-crawl-results.${format}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+
+      return blob;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async getStats(): Promise<StatsResponse> {
     try {
       const response = await apiService.get<StatsResponse>(API_ENDPOINTS.getStats);

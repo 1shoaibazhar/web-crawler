@@ -249,6 +249,8 @@ export const API_ENDPOINTS: ApiEndpoints = {
   deleteTask: (id: number) => `/api/v1/crawl/${id}`,
   bulkDelete: '/api/v1/crawl/bulk-delete',
   bulkRerun: '/api/v1/crawl/bulk-rerun',
+  bulkStop: '/api/v1/crawl/bulk-stop',
+  bulkExport: '/api/v1/crawl/bulk-export',
   
   // Statistics endpoints
   getStats: '/api/v1/stats',

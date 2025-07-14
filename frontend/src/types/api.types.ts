@@ -41,6 +41,8 @@ export interface ApiEndpoints {
   deleteTask: (id: number) => string;
   bulkDelete: string;
   bulkRerun: string;
+  bulkStop: string;
+  bulkExport: string;
   
   // Statistics endpoints
   getStats: string;

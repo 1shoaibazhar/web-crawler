@@ -1,7 +1,7 @@
 // WebSocket service for real-time updates
 
 import type { WebSocketMessage, WebSocketConfig, WebSocketEventMap } from '../types';
-import { serviceEvents } from './index';
+import { serviceEvents } from './event-emitter';
 import { StorageService } from './storage.service';
 
 export interface WebSocketConnectionState {

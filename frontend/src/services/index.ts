@@ -6,6 +6,7 @@ export { AuthService, authService } from './auth.service';
 export { CrawlService, crawlService } from './crawl.service';
 export { StorageService } from './storage.service';
 export { WebSocketService, webSocketService } from './websocket.service';
+export { serviceEvents, type ServiceEvent } from './event-emitter';
 
 // Import services for internal use
 import { apiService } from './api.service';
@@ -13,6 +14,7 @@ import { authService } from './auth.service';
 import { crawlService } from './crawl.service';
 import { StorageService } from './storage.service';
 import { webSocketService } from './websocket.service';
+import { serviceEvents } from './event-emitter';
 
 // Re-export types for convenience
 export type { ApiError, ApiConfig, ApiEndpoints } from '../types/api.types';
@@ -131,44 +133,7 @@ export const services = {
   websocket: webSocketService,
 } as const;
 
-// Service event types
-export type ServiceEvent = 
-  | 'auth:login'
-  | 'auth:logout'
-  | 'auth:token-refresh'
-  | 'crawl:started'
-  | 'crawl:completed'
-  | 'crawl:failed'
-  | 'crawl:progress'
-  | 'websocket:connected'
-  | 'websocket:disconnected'
-  | 'websocket:message'
-  | 'api:error';
 
-// Service event emitter
-class ServiceEventEmitter {
-  private listeners: { [key: string]: Function[] } = {};
-
-  on(event: ServiceEvent, callback: Function): void {
-    if (!this.listeners[event]) {
-      this.listeners[event] = [];
-    }
-    this.listeners[event].push(callback);
-  }
-
-  off(event: ServiceEvent, callback: Function): void {
-    if (!this.listeners[event]) return;
-    this.listeners[event] = this.listeners[event].filter(cb => cb !== callback);
-  }
-
-  emit(event: ServiceEvent, data?: any): void {
-    if (this.listeners[event]) {
-      this.listeners[event].forEach(callback => callback(data));
-    }
-  }
-}
-
-export const serviceEvents = new ServiceEventEmitter();
 
 // Service health checker
 export class ServiceHealthChecker {

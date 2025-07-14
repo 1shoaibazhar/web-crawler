@@ -1,6 +1,7 @@
 import React from 'react';
 import { Loading } from '../common/Loading';
 import { ErrorMessage } from '../common/ErrorMessage';
+import { DonutChart } from './DonutChart';
 import type { CrawlResult, CrawlLink } from '../../types';
 
 interface LinkAnalysisChartProps {
@@ -211,7 +212,7 @@ export const LinkAnalysisChart: React.FC<LinkAnalysisChartProps> = ({
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <PieChart data={linkTypeData} title="Link Types Distribution" />
+        <DonutChart data={linkTypeData} title="Internal vs External Links" size={250} />
         <PieChart data={linkStatusData} title="Link Status Distribution" />
       </div>
 

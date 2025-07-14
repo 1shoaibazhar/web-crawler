@@ -1,9 +1,9 @@
 import React, { useState, useMemo, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '../common/Button';
 import { Input } from '../common/Input';
 import { Loading } from '../common/Loading';
 import { ErrorMessage } from '../common/ErrorMessage';
-import { BulkActions } from './BulkActions';
 import { Checkbox } from '../common/Checkbox';
 import { ProgressBar } from '../common/ProgressBar';
 import { Badge } from '../common/Badge';
@@ -15,8 +15,7 @@ import {
   Play, 
   Trash2, 
   Eye,
-  Download,
-  MoreHorizontal
+  Download
 } from 'lucide-react';
 import type { CrawlTask, TaskStatus } from '../../types';
 
@@ -70,6 +69,7 @@ export const CrawlResultsTable: React.FC<CrawlResultsTableProps> = ({
   const [selectedTasks, setSelectedTasks] = useState<Set<number>>(new Set());
   const [showFilters, setShowFilters] = useState(false);
   const [showBulkActions, setShowBulkActions] = useState(false);
+  const navigate = useNavigate();
 
   // Filter and sort tasks
   const filteredAndSortedTasks = useMemo(() => {
@@ -214,6 +214,17 @@ export const CrawlResultsTable: React.FC<CrawlResultsTableProps> = ({
     setSelectedTasks(new Set());
     setShowBulkActions(false);
   }, []);
+
+  // Handle row click navigation
+  const handleRowClick = useCallback((task: CrawlTask, event: React.MouseEvent) => {
+    // Don't navigate if clicking on interactive elements
+    const target = event.target as HTMLElement;
+    if (target.closest('button') || target.closest('input') || target.closest('[role="button"]')) {
+      return;
+    }
+    
+    navigate(`/crawl/${task.id}`);
+  }, [navigate]);
 
   // Get status color and icon
   const getStatusConfig = (status: TaskStatus) => {
@@ -462,6 +473,8 @@ export const CrawlResultsTable: React.FC<CrawlResultsTableProps> = ({
                 <tr 
                   key={task.id} 
                   className={`hover:bg-gray-50 ${isSelected ? 'bg-blue-50' : ''}`}
+                  onClick={(event) => handleRowClick(task, event)}
+                  style={{ cursor: 'pointer' }}
                 >
                   <td className="px-4 py-3">
                     <Checkbox

@@ -69,6 +69,18 @@ export interface StartCrawlRequest {
   url: string;
 }
 
+export interface CrawlTaskRequest {
+  url: string;
+  max_depth?: number;
+  max_pages?: number;
+  delay?: number;
+  timeout?: number;
+  follow_redirects?: boolean;
+  respect_robots_txt?: boolean;
+  user_agent?: string;
+  headers?: Record<string, string>;
+}
+
 export interface CrawlTasksResponse {
   tasks: CrawlTask[];
   page: number;

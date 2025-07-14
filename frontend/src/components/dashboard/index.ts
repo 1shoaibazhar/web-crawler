@@ -1,7 +1,6 @@
-// Export all dashboard components from this file
-export * from './CrawlTasksTable';
-export * from './CrawlTaskRow';
-export * from './CrawlStatsCard';
-export * from './BulkActions';
-export * from './StatusBadge';
-export * from './ProgressIndicator'; 
+// Export all dashboard-related components
+export { DashboardStats } from './DashboardStats';
+export { CrawlResultsTable } from './CrawlResultsTable';
+
+// Re-export types for convenience
+export type { CrawlTask, TaskStatus, TasksQueryParams } from '../../types'; 

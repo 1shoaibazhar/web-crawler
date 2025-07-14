@@ -1,6 +1,5 @@
-// Export all components from this file
 export * from './common';
 export * from './auth';
+export * from './crawl';
 export * from './dashboard';
-export * from './forms';
-export * from './charts'; 
+export * from './details'; 

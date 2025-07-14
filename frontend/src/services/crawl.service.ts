@@ -6,6 +6,7 @@ import type {
   CrawlResult, 
   CrawlLink, 
   StartCrawlRequest, 
+  CrawlTaskRequest,
   CrawlTasksResponse, 
   TaskStatusResponse,
   TasksQueryParams,
@@ -26,6 +27,15 @@ export class CrawlService {
   }
 
   async startCrawl(data: StartCrawlRequest): Promise<CrawlTask> {
+    try {
+      const response = await apiService.post<CrawlTask>(API_ENDPOINTS.startCrawl, data);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async createTask(data: CrawlTaskRequest): Promise<CrawlTask> {
     try {
       const response = await apiService.post<CrawlTask>(API_ENDPOINTS.startCrawl, data);
       return response;

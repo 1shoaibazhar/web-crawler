@@ -1,6 +1,8 @@
 package api
 
 import (
+	"bytes"
+	"encoding/csv"
 	"net/http"
 	"strconv"
 	"web-crawler/internal/db"
@@ -381,4 +383,89 @@ func (h *CrawlHandler) GetLinks(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, links)
+}
+
+// ExportResults exports crawl results and links as CSV
+func (h *CrawlHandler) ExportResults(c *gin.Context) {
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+	taskID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid task ID"})
+		return
+	}
+	task, err := h.taskRepo.GetByID(taskID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve task"})
+		return
+	}
+	if task == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Task not found"})
+		return
+	}
+	if task.UserID != userID.(int) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Access denied"})
+		return
+	}
+	result, _ := h.resultRepo.GetByTaskID(taskID)
+	links, _ := h.linkRepo.GetByTaskID(taskID)
+
+	var buf bytes.Buffer
+	w := csv.NewWriter(&buf)
+	// Write result summary
+	w.Write([]string{"Field", "Value"})
+	if result != nil {
+		w.Write([]string{"Page Title", derefStr(result.PageTitle)})
+		w.Write([]string{"HTML Version", derefStr(result.HTMLVersion)})
+		w.Write([]string{"H1 Count", itoa(result.H1Count)})
+		w.Write([]string{"H2 Count", itoa(result.H2Count)})
+		w.Write([]string{"H3 Count", itoa(result.H3Count)})
+		w.Write([]string{"Internal Links", itoa(result.InternalLinksCount)})
+		w.Write([]string{"External Links", itoa(result.ExternalLinksCount)})
+		w.Write([]string{"Inaccessible Links", itoa(result.InaccessibleLinksCount)})
+		w.Write([]string{"Total Links", itoa(result.TotalLinksCount)})
+		w.Write([]string{"Response Time (ms)", itoa(result.ResponseTimeMs)})
+		w.Write([]string{"Page Size (bytes)", itoa(result.PageSizeBytes)})
+	}
+	w.Write([]string{})
+	// Write links header
+	w.Write([]string{"URL", "Type", "Status Code", "Accessible", "Anchor Text", "Response Time (ms)"})
+	for _, link := range links {
+		w.Write([]string{
+			link.URL,
+			link.LinkType,
+			itoaPtr(link.StatusCode),
+			boolToStr(link.IsAccessible),
+			derefStr(link.AnchorText),
+			itoa(link.ResponseTimeMs),
+		})
+	}
+	w.Flush()
+	c.Header("Content-Disposition", "attachment; filename=crawl-results.csv")
+	c.Data(http.StatusOK, "text/csv", buf.Bytes())
+}
+
+func derefStr(s *string) string {
+	if s == nil {
+		return ""
+	}
+	return *s
+}
+func itoa(i int) string {
+	return strconv.Itoa(i)
+}
+func itoaPtr(i *int) string {
+	if i == nil {
+		return ""
+	}
+	return strconv.Itoa(*i)
+}
+func boolToStr(b bool) string {
+	if b {
+		return "true"
+	}
+	return "false"
 }

@@ -55,6 +55,7 @@ func SetupRoutes(r *gin.Engine, database *sql.DB, taskQueue *queue.TaskQueue, ws
 				crawl.GET("/:id/results", crawlHandler.GetResults)
 				crawl.DELETE("/:id", crawlHandler.DeleteTask)
 				crawl.GET("/:id/links", crawlHandler.GetLinks)
+				crawl.GET("/:id/export", crawlHandler.ExportResults)
 			}
 		}
 	}

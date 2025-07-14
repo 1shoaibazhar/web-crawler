@@ -3,6 +3,7 @@ import { Button } from '../common/Button';
 import { Input } from '../common/Input';
 import { Loading } from '../common/Loading';
 import { ErrorMessage } from '../common/ErrorMessage';
+import { BulkActions } from './BulkActions';
 import type { CrawlTask, TaskStatus } from '../../types';
 
 interface CrawlResultsTableProps {
@@ -14,6 +15,8 @@ interface CrawlResultsTableProps {
   onTaskRerun?: (taskId: number) => void;
   onBulkDelete?: (taskIds: number[]) => void;
   onBulkRerun?: (taskIds: number[]) => void;
+  onBulkStop?: (taskIds: number[]) => void;
+  onBulkExport?: (taskIds: number[], format?: string) => void;
   className?: string;
 }
 
@@ -39,6 +42,8 @@ export const CrawlResultsTable: React.FC<CrawlResultsTableProps> = ({
   onTaskRerun,
   onBulkDelete,
   onBulkRerun,
+  onBulkStop,
+  onBulkExport,
   className = '',
 }) => {
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'created_at', direction: 'desc' });
@@ -170,6 +175,24 @@ export const CrawlResultsTable: React.FC<CrawlResultsTableProps> = ({
     }
   }, [selectedTasks, onBulkRerun]);
 
+  const handleBulkStop = useCallback((taskIds: number[]) => {
+    if (onBulkStop) {
+      onBulkStop(taskIds);
+      setSelectedTasks(new Set());
+    }
+  }, [onBulkStop]);
+
+  const handleBulkExport = useCallback((taskIds: number[], format?: string) => {
+    if (onBulkExport) {
+      onBulkExport(taskIds, format);
+      setSelectedTasks(new Set());
+    }
+  }, [onBulkExport]);
+
+  const handleClearSelection = useCallback(() => {
+    setSelectedTasks(new Set());
+  }, []);
+
   // Get status color
   const getStatusColor = (status: TaskStatus) => {
     switch (status) {
@@ -250,27 +273,15 @@ export const CrawlResultsTable: React.FC<CrawlResultsTableProps> = ({
         
         {/* Bulk Actions */}
         {selectedTasks.size > 0 && (
-          <div className="flex items-center space-x-2">
-            <span className="text-sm text-gray-600">
-              {selectedTasks.size} selected
-            </span>
-            <Button
-              variant="secondary"
-              size="small"
-              onClick={handleBulkRerun}
-              disabled={!onBulkRerun}
-            >
-              Rerun Selected
-            </Button>
-            <Button
-              variant="danger"
-              size="small"
-              onClick={handleBulkDelete}
-              disabled={!onBulkDelete}
-            >
-              Delete Selected
-            </Button>
-          </div>
+          <BulkActions
+            selectedCount={selectedTasks.size}
+            selectedTasks={Array.from(selectedTasks)}
+            onRerun={handleBulkRerun}
+            onDelete={handleBulkDelete}
+            onStop={handleBulkStop}
+            onExport={handleBulkExport}
+            onClear={handleClearSelection}
+          />
         )}
       </div>
 

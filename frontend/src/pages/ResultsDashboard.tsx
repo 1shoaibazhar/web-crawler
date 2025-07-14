@@ -138,6 +138,30 @@ export const ResultsDashboard: React.FC = () => {
     }
   }, [loadTasks]);
 
+  const handleBulkStop = useCallback(async (taskIds: number[]) => {
+    if (!confirm(`Are you sure you want to stop ${taskIds.length} tasks?`)) {
+      return;
+    }
+
+    try {
+      await crawlService.bulkStop(taskIds);
+      // Refresh tasks to show updated status
+      await loadTasks();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to stop tasks';
+      setError(errorMessage);
+    }
+  }, [loadTasks]);
+
+  const handleBulkExport = useCallback(async (taskIds: number[], format: string = 'csv') => {
+    try {
+      await crawlService.bulkExport(taskIds, format as 'csv' | 'json' | 'xlsx');
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to export tasks';
+      setError(errorMessage);
+    }
+  }, []);
+
   const handleExportResults = useCallback(async () => {
     try {
       const completedTasks = tasks.filter(task => task.status === 'completed');
@@ -253,6 +277,8 @@ export const ResultsDashboard: React.FC = () => {
         onTaskRerun={handleTaskRerun}
         onBulkDelete={handleBulkDelete}
         onBulkRerun={handleBulkRerun}
+        onBulkStop={handleBulkStop}
+        onBulkExport={handleBulkExport}
       />
 
       {/* Task Details Modal */}

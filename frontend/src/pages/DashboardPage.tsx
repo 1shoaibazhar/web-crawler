@@ -10,32 +10,27 @@ import { useAuth } from '../hooks/useAuth';
 import type { CrawlTask } from '../types';
 
 export const DashboardPage: React.FC = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading: authLoading, token } = useAuth();
   const { success, error: showError } = useNotifications();
   const [tasks, setTasks] = useState<CrawlTask[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Load tasks on mount
-  useEffect(() => {
-    if (isAuthenticated) {
-      loadTasks();
-    }
-  }, [isAuthenticated]);
 
   const loadTasks = useCallback(async () => {
     setLoading(true);
     setError(null);
 
     try {
+      console.log('Loading tasks with token:', token ? 'Token available' : 'No token');
       const response = await crawlService.getTasks({
         limit: 50,
         sortBy: 'created_at',
         sortOrder: 'desc',
       });
 
-      setTasks(response.tasks);
+      setTasks(response.tasks ?? []);
     } catch (error) {
+      console.error('Failed to load tasks:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to load tasks';
       setError(errorMessage);
       showError('Load Error', errorMessage);
@@ -43,6 +38,17 @@ export const DashboardPage: React.FC = () => {
       setLoading(false);
     }
   }, [showError]);
+
+  // Load tasks when authentication is complete and token is available
+  useEffect(() => {
+    if (isAuthenticated && !authLoading && token) {
+      // Add a small delay to ensure authentication state is fully propagated
+      const timer = setTimeout(() => {
+        loadTasks();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isAuthenticated, authLoading, token, loadTasks]);
 
   const handleTaskSelect = useCallback((task: CrawlTask) => {
     window.location.href = `/crawl/${task.id}`;
@@ -77,6 +83,15 @@ export const DashboardPage: React.FC = () => {
       showError('Rerun Error', errorMessage);
     }
   }, [loadTasks, success, showError]);
+
+  // Show loading while authentication is being initialized
+  if (authLoading) {
+    return (
+      <ResponsiveLayout maxWidth="2xl" padding="lg">
+        <LoadingSpinner size="xl" text="Initializing..." />
+      </ResponsiveLayout>
+    );
+  }
 
   if (!isAuthenticated) {
     return (

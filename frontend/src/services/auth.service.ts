@@ -48,6 +48,7 @@ export class AuthService {
       // Store tokens and user info
       if (response.access_token) {
         StorageService.setToken(response.access_token);
+        console.log('Auth Service - Token stored in localStorage');
       }
       if (response.refresh_token) {
         StorageService.setRefreshToken(response.refresh_token);

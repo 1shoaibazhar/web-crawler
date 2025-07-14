@@ -29,8 +29,12 @@ export class ApiService {
     this.client.interceptors.request.use(
       (config) => {
         const token = StorageService.getToken();
+        console.log('API Request - Token available:', !!token, 'URL:', config.url);
         if (token && !StorageService.isTokenExpired(token)) {
           config.headers.Authorization = `Bearer ${token}`;
+          console.log('API Request - Authorization header set');
+        } else {
+          console.log('API Request - No valid token available');
         }
         return config;
       },

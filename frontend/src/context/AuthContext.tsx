@@ -110,6 +110,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       const response = await authService.login(credentials);
       
+      console.log('Login successful, token:', response.access_token ? 'Token received' : 'No token');
+      
       updateAuthState({
         user: response.user,
         token: response.access_token,

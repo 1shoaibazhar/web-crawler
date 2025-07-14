@@ -92,9 +92,9 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, TokenResponse{
-		Token: token,
-		User: &UserInfo{
+	c.JSON(http.StatusOK, gin.H{
+		"access_token": token,
+		"user": &UserInfo{
 			ID:       user.ID,
 			Username: user.Username,
 			Email:    user.Email,
@@ -176,9 +176,9 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, TokenResponse{
-		Token: token,
-		User: &UserInfo{
+	c.JSON(http.StatusCreated, gin.H{
+		"access_token": token,
+		"user": &UserInfo{
 			ID:       user.ID,
 			Username: user.Username,
 			Email:    user.Email,
@@ -210,7 +210,7 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"token": newToken,
+		"access_token": newToken,
 	})
 }
 

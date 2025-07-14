@@ -46,7 +46,9 @@ func SetupRoutes(r *gin.Engine, database *sql.DB, taskQueue *queue.TaskQueue, ws
 			// Crawl routes
 			crawl := protected.Group("/crawl")
 			{
+				crawl.POST("", crawlHandler.StartCrawl)
 				crawl.POST("/", crawlHandler.StartCrawl)
+				crawl.GET("", crawlHandler.GetUserTasks)
 				crawl.GET("/", crawlHandler.GetUserTasks)
 				crawl.GET("/:id", crawlHandler.GetTaskStatus)
 				crawl.PUT("/:id/stop", crawlHandler.StopCrawl)

@@ -109,6 +109,10 @@ func (h *CrawlHandler) GetUserTasks(c *gin.Context) {
 		return
 	}
 
+	if tasks == nil {
+		tasks = []*db.CrawlTask{}
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"tasks": tasks,
 		"page":  page,

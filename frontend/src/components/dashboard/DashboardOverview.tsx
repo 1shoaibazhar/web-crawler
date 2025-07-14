@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -69,6 +70,8 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, change, icon, color, 
 };
 
 export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ tasks, loading = false }) => {
+  const navigate = useNavigate();
+  
   // Calculate statistics
   const totalTasks = tasks.length;
   const completedTasks = tasks.filter(task => task.status === 'completed').length;
@@ -191,7 +194,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ tasks, loa
       <ResponsiveCard>
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <button className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+          <button
+            className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            onClick={() => navigate('/url-management')}
+          >
             <Globe className="w-6 h-6 text-blue-600 mb-2" />
             <span className="text-sm font-medium text-gray-900">New Crawl</span>
           </button>

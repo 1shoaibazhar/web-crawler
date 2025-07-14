@@ -2,4 +2,6 @@
 export * from './AuthContext';
 export * from './CrawlContext';
 export * from './WebSocketContext';
-export * from './AppContext'; 
+export * from './AppContext';
+export * from './SettingsContext';
+export * from './NotificationContext'; 

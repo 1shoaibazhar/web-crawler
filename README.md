@@ -9,6 +9,8 @@ A progressive web crawler application built with Go (Gin) backend and React fron
 - **Queue System**: Handle multiple crawling tasks in queue
 - **Real-time Updates**: WebSocket-based status updates
 - **Authentication**: JWT-based authentication system
+- **Modern Web Interface**: React frontend with responsive design
+- **Bulk Operations**: Select and manage multiple tasks at once
 - **Comprehensive Analysis**: 
   - HTML version detection
   - Page title extraction
@@ -26,6 +28,7 @@ The easiest way to get started is using Docker:
 ./scripts/dev-start.sh
 
 # Access the application
+# - Frontend App: http://localhost:3000
 # - Backend API: http://localhost:8080
 # - Database Admin: http://localhost:8081
 ```
@@ -49,7 +52,16 @@ web-crawler/
 │   ├── pkg/               # Public packages
 │   ├── migrations/        # Database migrations
 │   └── config/            # Configuration files
-├── frontend/              # React frontend application (Future)
+├── frontend/              # React frontend application
+│   ├── src/               # Source code
+│   │   ├── components/    # React components
+│   │   ├── pages/         # Page components
+│   │   ├── services/      # API services
+│   │   ├── hooks/         # Custom React hooks
+│   │   ├── context/       # React context providers
+│   │   └── types/         # TypeScript type definitions
+│   ├── public/            # Static assets
+│   └── package.json       # Dependencies
 ├── docker/                # Docker configuration
 ├── scripts/               # Development scripts
 └── docs/                  # Documentation
@@ -65,10 +77,14 @@ web-crawler/
 - **WebSockets** - Real-time communication
 - **Docker** - Containerization
 
-### Frontend (Future)
-- **React** - Frontend framework
+### Frontend
+- **React 18** - Frontend framework
+- **TypeScript** - Type safety
+- **Vite** - Build tool and dev server
+- **Tailwind CSS** - Utility-first CSS framework
+- **Lucide React** - Icon library
+- **React Router** - Client-side routing
 - **WebSocket** - Real-time updates
-- **Material-UI** - UI components
 
 ## Manual Setup (Alternative)
 
@@ -76,6 +92,7 @@ If you prefer not to use Docker:
 
 ### Prerequisites
 - Go 1.21 or higher
+- Node.js 18 or higher
 - MySQL 8.0 or higher
 
 ### Backend Setup
@@ -84,8 +101,14 @@ If you prefer not to use Docker:
 3. Set up database and run migrations
 4. Start the server: `go run cmd/main.go`
 
+### Frontend Setup
+1. Navigate to frontend directory: `cd frontend`
+2. Install dependencies: `npm install`
+3. Start the development server: `npm run dev`
+
 ### Environment Variables
 ```bash
+# Backend
 DB_HOST=localhost
 DB_PORT=3306
 DB_USER=root
@@ -93,6 +116,10 @@ DB_PASSWORD=password
 DB_NAME=web_crawler
 JWT_SECRET=your-secret-key
 SERVER_PORT=8080
+
+# Frontend
+VITE_API_URL=http://localhost:8080
+VITE_WS_URL=ws://localhost:8080
 ```
 
 ## API Endpoints
@@ -126,6 +153,7 @@ SERVER_PORT=8080
 
 # View logs
 docker-compose logs -f backend
+docker-compose logs -f frontend
 
 # Stop environment
 ./scripts/dev-stop.sh
@@ -136,35 +164,35 @@ docker-compose logs -f backend
 
 ### Manual Development
 ```bash
-# Install dependencies
+# Backend
 cd backend && go mod download
-
-# Run with hot reload (install air first)
-go install github.com/cosmtrek/air@latest
-air
-
-# Or run directly
 go run cmd/main.go
+
+# Frontend (in another terminal)
+cd frontend && npm install
+npm run dev
 ```
 
-## Testing the API
+## Testing the Application
 
-### Register a User
+### Using the Web Interface
+1. Open http://localhost:3000 in your browser
+2. Register a new account or use the default credentials
+3. Start creating crawl tasks and monitor their progress
+
+### Using the API
 ```bash
+# Register a User
 curl -X POST http://localhost:8080/api/v1/auth/register \
   -H "Content-Type: application/json" \
   -d '{"username":"testuser","email":"test@example.com","password":"password123"}'
-```
 
-### Login
-```bash
+# Login
 curl -X POST http://localhost:8080/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username":"testuser","password":"password123"}'
-```
 
-### Start Crawling (replace TOKEN)
-```bash
+# Start Crawling (replace TOKEN)
 curl -X POST http://localhost:8080/api/v1/crawl \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer TOKEN" \
@@ -183,8 +211,10 @@ This project is developed in stages for proper git commit management:
 6. ✅ Queue system
 7. ✅ Real-time updates
 8. ✅ Docker configuration
-9. 🔄 Testing and optimization
-10. 🔲 Frontend development
+9. ✅ Frontend development
+10. ✅ Error handling & notifications
+11. ✅ Responsive design
+12. 🔄 Testing and optimization
 
 ## Default Users
 
@@ -196,8 +226,4 @@ The system includes default users for testing:
 
 - [Docker Setup Guide](docs/DOCKER_SETUP.md) - Comprehensive Docker development setup
 - [API Documentation](docs/API.md) - Detailed API documentation (Coming soon)
-- [Frontend Guide](docs/FRONTEND.md) - Frontend development guide (Coming soon)
-
-## License
-
-MIT License 
+- [Frontend Guide](docs/FRONTEND.md) - Frontend development guide (Coming soon) 

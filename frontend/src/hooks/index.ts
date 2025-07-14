@@ -7,4 +7,5 @@ export * from './useLocalStorage';
 export * from './useDebounce';
 export * from './usePagination';
 export * from './useSort';
-export * from './useFilter'; 
+export * from './useFilter';
+export * from './useSettings'; 

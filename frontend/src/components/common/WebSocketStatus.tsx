@@ -1,8 +1,8 @@
 import React from 'react';
-import { useWebSocketConnection } from '../../hooks/useWebSocket';
+import { useWebSocket } from '../../hooks/useWebSocket';
 
 export const WebSocketStatus: React.FC = () => {
-  const { isConnected, isConnecting, isReconnecting, error, lastConnected, connectionAttempts } = useWebSocketConnection();
+  const { isConnected, isConnecting, isReconnecting, error } = useWebSocket();
 
   const getStatusColor = () => {
     if (isConnected) return 'bg-green-500';
@@ -14,7 +14,7 @@ export const WebSocketStatus: React.FC = () => {
   const getStatusText = () => {
     if (isConnected) return 'Connected';
     if (isConnecting) return 'Connecting...';
-    if (isReconnecting) return `Reconnecting... (${connectionAttempts}/5)`;
+    if (isReconnecting) return 'Reconnecting...';
     if (error) return 'Disconnected';
     return 'Offline';
   };
@@ -23,11 +23,6 @@ export const WebSocketStatus: React.FC = () => {
     <div className="flex items-center space-x-2 text-sm">
       <div className={`w-2 h-2 rounded-full ${getStatusColor()}`} />
       <span className="text-gray-700">{getStatusText()}</span>
-      {lastConnected && (
-        <span className="text-gray-500 text-xs">
-          Last: {new Date(lastConnected).toLocaleTimeString()}
-        </span>
-      )}
       {error && (
         <span className="text-red-500 text-xs" title={error}>
           ⚠️

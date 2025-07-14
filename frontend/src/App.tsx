@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { CrawlProvider } from './context/CrawlContext';
 import { WebSocketProvider } from './context/WebSocketContext';
+import { SettingsProvider } from './context/SettingsContext';
 import { 
   LoginPage, 
   RegisterPage, 
@@ -11,7 +12,8 @@ import {
   ResultsDashboard, 
   CrawlDetailsPage,
   WebSocketDemo,
-  BulkActionsDemo
+  BulkActionsDemo,
+  SettingsPage
 } from './pages';
 
 // Protected Route Component
@@ -90,6 +92,11 @@ const AppRoutes: React.FC = () => {
           <BulkActionsDemo />
         </ProtectedRoute>
       } />
+      <Route path="/settings" element={
+        <ProtectedRoute>
+          <SettingsPage />
+        </ProtectedRoute>
+      } />
 
       {/* Default redirect */}
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
@@ -103,9 +110,11 @@ const App: React.FC = () => {
     <Router>
       <AuthProvider>
         <WebSocketProvider>
-          <CrawlProvider>
-            <AppRoutes />
-          </CrawlProvider>
+          <SettingsProvider>
+            <CrawlProvider>
+              <AppRoutes />
+            </CrawlProvider>
+          </SettingsProvider>
         </WebSocketProvider>
       </AuthProvider>
     </Router>

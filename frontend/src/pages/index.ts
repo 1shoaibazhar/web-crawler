@@ -7,6 +7,7 @@ export { ResultsDashboard } from './ResultsDashboard';
 export { CrawlDetailsPage } from './CrawlDetailsPage';
 export { WebSocketDemo } from './WebSocketDemo';
 export { BulkActionsDemo } from './BulkActionsDemo';
+export { SettingsPage } from './SettingsPage';
 
 // TODO: Add other pages as they are created
 // export { default as Home } from './Home';

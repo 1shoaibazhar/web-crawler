@@ -7,8 +7,10 @@ import { NotificationToast } from './NotificationToast';
 export const NotificationContainer: React.FC = () => {
   const { state, removeNotification, clearAll, setOpen } = useNotifications();
 
-  const handleAction = (action: NonNullable<Notification['action']>) => {
-    action.onClick();
+  const handleAction = (action: Notification['action']) => {
+    if (action) {
+      action.onClick();
+    }
   };
 
   if (state.notifications.length === 0) {

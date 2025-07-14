@@ -4,6 +4,9 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { CrawlProvider } from './context/CrawlContext';
 import { WebSocketProvider } from './context/WebSocketContext';
 import { SettingsProvider } from './context/SettingsContext';
+import { NotificationProvider } from './context/NotificationContext';
+import { NotificationContainer } from './components/common/NotificationContainer';
+import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { 
   LoginPage, 
   RegisterPage, 
@@ -108,15 +111,20 @@ const AppRoutes: React.FC = () => {
 const App: React.FC = () => {
   return (
     <Router>
-      <AuthProvider>
-        <WebSocketProvider>
-          <SettingsProvider>
-            <CrawlProvider>
-              <AppRoutes />
-            </CrawlProvider>
-          </SettingsProvider>
-        </WebSocketProvider>
-      </AuthProvider>
+      <ErrorBoundary>
+        <AuthProvider>
+          <NotificationProvider>
+            <WebSocketProvider>
+              <SettingsProvider>
+                <CrawlProvider>
+                  <AppRoutes />
+                  <NotificationContainer />
+                </CrawlProvider>
+              </SettingsProvider>
+            </WebSocketProvider>
+          </NotificationProvider>
+        </AuthProvider>
+      </ErrorBoundary>
     </Router>
   );
 };

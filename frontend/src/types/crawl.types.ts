@@ -47,7 +47,7 @@ export interface CrawlLink {
   created_at: string;
 }
 
-export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'failed' | 'cancelled';
+export type TaskStatus = 'pending' | 'running' | 'completed' | 'failed' | 'stopped' | 'in_progress' | 'cancelled';
 
 export type LinkType = 'internal' | 'external';
 

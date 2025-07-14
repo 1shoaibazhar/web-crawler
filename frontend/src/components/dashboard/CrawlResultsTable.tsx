@@ -4,6 +4,20 @@ import { Input } from '../common/Input';
 import { Loading } from '../common/Loading';
 import { ErrorMessage } from '../common/ErrorMessage';
 import { BulkActions } from './BulkActions';
+import { Checkbox } from '../common/Checkbox';
+import { ProgressBar } from '../common/ProgressBar';
+import { Badge } from '../common/Badge';
+import { 
+  ChevronDown, 
+  ChevronUp, 
+  Search, 
+  Filter, 
+  Play, 
+  Trash2, 
+  Eye,
+  Download,
+  MoreHorizontal
+} from 'lucide-react';
 import type { CrawlTask, TaskStatus } from '../../types';
 
 interface CrawlResultsTableProps {
@@ -55,6 +69,7 @@ export const CrawlResultsTable: React.FC<CrawlResultsTableProps> = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedTasks, setSelectedTasks] = useState<Set<number>>(new Set());
   const [showFilters, setShowFilters] = useState(false);
+  const [showBulkActions, setShowBulkActions] = useState(false);
 
   // Filter and sort tasks
   const filteredAndSortedTasks = useMemo(() => {
@@ -150,7 +165,8 @@ export const CrawlResultsTable: React.FC<CrawlResultsTableProps> = ({
       }
       return newSet;
     });
-  }, []);
+    setShowBulkActions(selected || selectedTasks.size > 0);
+  }, [selectedTasks.size]);
 
   const handleSelectAll = useCallback((selected: boolean) => {
     if (selected) {
@@ -158,6 +174,7 @@ export const CrawlResultsTable: React.FC<CrawlResultsTableProps> = ({
     } else {
       setSelectedTasks(new Set());
     }
+    setShowBulkActions(selected);
   }, [paginatedTasks]);
 
   // Handle bulk actions
@@ -165,6 +182,7 @@ export const CrawlResultsTable: React.FC<CrawlResultsTableProps> = ({
     if (selectedTasks.size > 0 && onBulkDelete) {
       onBulkDelete(Array.from(selectedTasks));
       setSelectedTasks(new Set());
+      setShowBulkActions(false);
     }
   }, [selectedTasks, onBulkDelete]);
 
@@ -172,6 +190,7 @@ export const CrawlResultsTable: React.FC<CrawlResultsTableProps> = ({
     if (selectedTasks.size > 0 && onBulkRerun) {
       onBulkRerun(Array.from(selectedTasks));
       setSelectedTasks(new Set());
+      setShowBulkActions(false);
     }
   }, [selectedTasks, onBulkRerun]);
 
@@ -179,6 +198,7 @@ export const CrawlResultsTable: React.FC<CrawlResultsTableProps> = ({
     if (onBulkStop) {
       onBulkStop(taskIds);
       setSelectedTasks(new Set());
+      setShowBulkActions(false);
     }
   }, [onBulkStop]);
 
@@ -186,381 +206,407 @@ export const CrawlResultsTable: React.FC<CrawlResultsTableProps> = ({
     if (onBulkExport) {
       onBulkExport(taskIds, format);
       setSelectedTasks(new Set());
+      setShowBulkActions(false);
     }
   }, [onBulkExport]);
 
   const handleClearSelection = useCallback(() => {
     setSelectedTasks(new Set());
+    setShowBulkActions(false);
   }, []);
 
-  // Get status color
-  const getStatusColor = (status: TaskStatus) => {
+  // Get status color and icon
+  const getStatusConfig = (status: TaskStatus) => {
     switch (status) {
       case 'completed':
-        return 'text-green-600 bg-green-50';
-      case 'failed':
-        return 'text-red-600 bg-red-50';
-      case 'cancelled':
-        return 'text-yellow-600 bg-yellow-50';
-      case 'in_progress':
-        return 'text-blue-600 bg-blue-50';
+        return { color: 'success', text: 'Completed' };
+      case 'running':
+        return { color: 'primary', text: 'Running' };
       case 'pending':
-        return 'text-gray-600 bg-gray-50';
+        return { color: 'warning', text: 'Pending' };
+      case 'failed':
+        return { color: 'error', text: 'Failed' };
+      case 'stopped':
+        return { color: 'secondary', text: 'Stopped' };
       default:
-        return 'text-gray-600 bg-gray-50';
+        return { color: 'secondary', text: status };
     }
   };
 
-  // Format date
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString();
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
   };
 
-  // Get sort icon
   const getSortIcon = (key: keyof CrawlTask) => {
     if (sortConfig.key !== key) {
-      return (
-        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
-        </svg>
-      );
+      return <ChevronDown className="w-4 h-4 text-gray-400" />;
     }
-    
-    return sortConfig.direction === 'asc' ? (
-      <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-      </svg>
-    ) : (
-      <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-      </svg>
-    );
+    return sortConfig.direction === 'asc' 
+      ? <ChevronUp className="w-4 h-4 text-blue-600" />
+      : <ChevronDown className="w-4 h-4 text-blue-600" />;
   };
 
+  const isAllSelected = paginatedTasks.length > 0 && selectedTasks.size === paginatedTasks.length;
+  const isIndeterminate = selectedTasks.size > 0 && selectedTasks.size < paginatedTasks.length;
+
   if (loading) {
-    return (
-      <div className={`flex justify-center py-8 ${className}`}>
-        <Loading text="Loading tasks..." />
-      </div>
-    );
+    return <Loading text="Loading tasks..." />;
   }
 
   if (error) {
-    return (
-      <div className={className}>
-        <ErrorMessage message={error} />
-      </div>
-    );
+    return <ErrorMessage message={error} />;
   }
 
   return (
-    <div className={`space-y-4 ${className}`}>
-      {/* Header with filters toggle and bulk actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex items-center space-x-4">
-          <h2 className="text-xl font-semibold text-gray-900">
-            Crawl Results ({filteredAndSortedTasks.length})
-          </h2>
+    <div className={`bg-white rounded-lg shadow ${className}`}>
+      {/* Header with filters and search */}
+      <div className="p-4 border-b border-gray-200">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <h2 className="text-lg font-semibold text-gray-900">Crawl Results</h2>
+            <span className="text-sm text-gray-500">
+              {filteredAndSortedTasks.length} tasks
+            </span>
+          </div>
           
-          <Button
-            variant="secondary"
-            size="small"
-            onClick={() => setShowFilters(!showFilters)}
-          >
-            {showFilters ? 'Hide Filters' : 'Show Filters'}
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-3">
+            {/* Search */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Input
+                type="text"
+                placeholder="Search tasks..."
+                value={filterConfig.search}
+                onChange={(e) => handleFilterChange({ search: e.target.value })}
+                className="pl-10 w-full sm:w-64"
+              />
+            </div>
+            
+            {/* Filter toggle */}
+            <Button
+              variant="outline"
+              onClick={() => setShowFilters(!showFilters)}
+              className="flex items-center gap-2"
+            >
+              <Filter className="w-4 h-4" />
+              Filters
+            </Button>
+          </div>
         </div>
-        
-        {/* Bulk Actions */}
-        {selectedTasks.size > 0 && (
-          <BulkActions
-            selectedCount={selectedTasks.size}
-            selectedTasks={Array.from(selectedTasks)}
-            onRerun={handleBulkRerun}
-            onDelete={handleBulkDelete}
-            onStop={handleBulkStop}
-            onExport={handleBulkExport}
-            onClear={handleClearSelection}
-          />
+
+        {/* Filters panel */}
+        {showFilters && (
+          <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Status
+                </label>
+                <select
+                  value={filterConfig.status}
+                  onChange={(e) => handleFilterChange({ status: e.target.value as TaskStatus | 'all' })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">All Status</option>
+                  <option value="completed">Completed</option>
+                  <option value="running">Running</option>
+                  <option value="pending">Pending</option>
+                  <option value="failed">Failed</option>
+                  <option value="stopped">Stopped</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Date Range
+                </label>
+                <select
+                  value={filterConfig.dateRange}
+                  onChange={(e) => handleFilterChange({ dateRange: e.target.value as any })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">All Time</option>
+                  <option value="today">Today</option>
+                  <option value="week">Last 7 Days</option>
+                  <option value="month">Last 30 Days</option>
+                </select>
+              </div>
+            </div>
+          </div>
         )}
       </div>
 
-      {/* Filters */}
-      {showFilters && (
-        <div className="bg-gray-50 rounded-lg p-4 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Global Search */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Search
-              </label>
-              <Input
-                type="text"
-                placeholder="Search by URL, ID, or error..."
-                value={filterConfig.search}
-                onChange={(e) => handleFilterChange({ search: e.target.value })}
-              />
-            </div>
-
-            {/* Status Filter */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Status
-              </label>
-              <select
-                value={filterConfig.status}
-                onChange={(e) => handleFilterChange({ status: e.target.value as TaskStatus | 'all' })}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+      {/* Bulk actions */}
+      {showBulkActions && (
+        <div className="p-4 bg-blue-50 border-b border-blue-200">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-blue-700">
+                {selectedTasks.size} task{selectedTasks.size !== 1 ? 's' : ''} selected
+              </span>
+              <Button
+                variant="text"
+                onClick={handleClearSelection}
+                className="text-blue-600 hover:text-blue-800"
               >
-                <option value="all">All Statuses</option>
-                <option value="pending">Pending</option>
-                <option value="in_progress">In Progress</option>
-                <option value="completed">Completed</option>
-                <option value="failed">Failed</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
+                Clear selection
+              </Button>
             </div>
-
-            {/* Date Range Filter */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Date Range
-              </label>
-              <select
-                value={filterConfig.dateRange}
-                onChange={(e) => handleFilterChange({ dateRange: e.target.value as FilterConfig['dateRange'] })}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant="outline"
+                onClick={handleBulkRerun}
+                className="flex items-center gap-2"
               >
-                <option value="all">All Time</option>
-                <option value="today">Today</option>
-                <option value="week">Last Week</option>
-                <option value="month">Last Month</option>
-              </select>
+                <Play className="w-4 h-4" />
+                Rerun
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => handleBulkStop(Array.from(selectedTasks))}
+                className="flex items-center gap-2"
+              >
+                Stop
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => handleBulkExport(Array.from(selectedTasks))}
+                className="flex items-center gap-2"
+              >
+                <Download className="w-4 h-4" />
+                Export
+              </Button>
+              <Button
+                variant="error"
+                onClick={handleBulkDelete}
+                className="flex items-center gap-2"
+              >
+                <Trash2 className="w-4 h-4" />
+                Delete
+              </Button>
             </div>
-          </div>
-
-          {/* Clear Filters */}
-          <div className="flex justify-end">
-            <Button
-              variant="secondary"
-              size="small"
-              onClick={() => {
-                setFilterConfig({ status: 'all', search: '', dateRange: 'all' });
-                setCurrentPage(1);
-              }}
-            >
-              Clear Filters
-            </Button>
           </div>
         </div>
       )}
 
       {/* Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  <input
-                    type="checkbox"
-                    checked={selectedTasks.size === paginatedTasks.length && paginatedTasks.length > 0}
-                    onChange={(e) => handleSelectAll(e.target.checked)}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                  />
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  <button
-                    onClick={() => handleSort('id')}
-                    className="flex items-center space-x-1 hover:text-gray-700"
-                  >
-                    <span>ID</span>
-                    {getSortIcon('id')}
-                  </button>
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  <button
-                    onClick={() => handleSort('url')}
-                    className="flex items-center space-x-1 hover:text-gray-700"
-                  >
-                    <span>URL</span>
-                    {getSortIcon('url')}
-                  </button>
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  <button
-                    onClick={() => handleSort('status')}
-                    className="flex items-center space-x-1 hover:text-gray-700"
-                  >
-                    <span>Status</span>
-                    {getSortIcon('status')}
-                  </button>
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  <button
-                    onClick={() => handleSort('progress')}
-                    className="flex items-center space-x-1 hover:text-gray-700"
-                  >
-                    <span>Progress</span>
-                    {getSortIcon('progress')}
-                  </button>
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  <button
-                    onClick={() => handleSort('created_at')}
-                    className="flex items-center space-x-1 hover:text-gray-700"
-                  >
-                    <span>Created</span>
-                    {getSortIcon('created_at')}
-                  </button>
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {paginatedTasks.map((task) => (
-                <tr key={task.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <input
-                      type="checkbox"
-                      checked={selectedTasks.has(task.id)}
-                      onChange={(e) => handleTaskSelect(task.id, e.target.checked)}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-4 py-3 text-left">
+                <Checkbox
+                  checked={isAllSelected}
+                  indeterminate={isIndeterminate}
+                  onChange={(checked) => handleSelectAll(checked)}
+                  aria-label="Select all tasks"
+                />
+              </th>
+              <th 
+                className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                onClick={() => handleSort('id')}
+              >
+                <div className="flex items-center gap-1">
+                  ID
+                  {getSortIcon('id')}
+                </div>
+              </th>
+              <th 
+                className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                onClick={() => handleSort('url')}
+              >
+                <div className="flex items-center gap-1">
+                  URL
+                  {getSortIcon('url')}
+                </div>
+              </th>
+              <th 
+                className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                onClick={() => handleSort('status')}
+              >
+                <div className="flex items-center gap-1">
+                  Status
+                  {getSortIcon('status')}
+                </div>
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Progress
+              </th>
+              <th 
+                className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                onClick={() => handleSort('created_at')}
+              >
+                <div className="flex items-center gap-1">
+                  Created
+                  {getSortIcon('created_at')}
+                </div>
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {paginatedTasks.map((task) => {
+              const statusConfig = getStatusConfig(task.status);
+              const isSelected = selectedTasks.has(task.id);
+              
+              return (
+                <tr 
+                  key={task.id} 
+                  className={`hover:bg-gray-50 ${isSelected ? 'bg-blue-50' : ''}`}
+                >
+                  <td className="px-4 py-3">
+                    <Checkbox
+                      checked={isSelected}
+                      onChange={(checked) => handleTaskSelect(task.id, checked)}
+                      aria-label={`Select task ${task.id}`}
                     />
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {task.id}
+                  <td className="px-4 py-3 text-sm text-gray-900">
+                    #{task.id}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900 truncate max-w-xs">
-                      <a
-                        href={task.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="hover:text-blue-600 hover:underline"
-                      >
+                  <td className="px-4 py-3">
+                    <div className="max-w-xs">
+                      <div className="text-sm text-gray-900 truncate" title={task.url}>
                         {task.url}
-                      </a>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(task.status)}`}>
-                      {task.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="w-full bg-gray-200 rounded-full h-2 mr-2">
-                        <div
-                          className="bg-blue-600 h-2 rounded-full"
-                          style={{ width: `${task.progress}%` }}
-                        />
                       </div>
-                      <span className="text-sm text-gray-900">{task.progress}%</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-4 py-3">
+                    <Badge variant={statusConfig.color as any}>
+                      {statusConfig.text}
+                    </Badge>
+                  </td>
+                  <td className="px-4 py-3">
+                    {task.status === 'running' && task.progress !== undefined ? (
+                      <div className="w-32">
+                        <ProgressBar 
+                          value={task.progress} 
+                          max={100}
+                          className="h-2"
+                        />
+                        <div className="text-xs text-gray-500 mt-1">
+                          {task.progress}%
+                        </div>
+                      </div>
+                    ) : task.status === 'completed' ? (
+                      <div className="text-sm text-green-600">100%</div>
+                    ) : (
+                      <div className="text-sm text-gray-400">-</div>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-500">
                     {formatDate(task.created_at)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex space-x-2">
-                      {onTaskSelect && (
-                        <button
-                          onClick={() => onTaskSelect(task)}
-                          className="text-blue-600 hover:text-blue-900"
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="text"
+                        size="sm"
+                        onClick={() => onTaskSelect?.(task)}
+                        className="text-blue-600 hover:text-blue-800"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                      
+                      {task.status === 'completed' && (
+                        <Button
+                          variant="text"
+                          size="sm"
+                          onClick={() => onTaskRerun?.(task.id)}
+                          className="text-green-600 hover:text-green-800"
                         >
-                          View
-                        </button>
+                          <Play className="w-4 h-4" />
+                        </Button>
                       )}
-                      {onTaskRerun && (
-                        <button
-                          onClick={() => onTaskRerun(task.id)}
-                          className="text-green-600 hover:text-green-900"
-                        >
-                          Rerun
-                        </button>
-                      )}
-                      {onTaskDelete && (
-                        <button
-                          onClick={() => onTaskDelete(task.id)}
-                          className="text-red-600 hover:text-red-900"
-                        >
-                          Delete
-                        </button>
-                      )}
+                      
+                      <Button
+                        variant="text"
+                        size="sm"
+                        onClick={() => onTaskDelete?.(task.id)}
+                        className="text-red-600 hover:text-red-800"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </div>
                   </td>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Empty State */}
-        {paginatedTasks.length === 0 && (
-          <div className="text-center py-12">
-            <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-            </svg>
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No tasks found</h3>
-            <p className="mt-1 text-sm text-gray-500">
-              {filterConfig.search || filterConfig.status !== 'all' || filterConfig.dateRange !== 'all'
-                ? 'Try adjusting your filters'
-                : 'Get started by creating a new crawl task'}
-            </p>
-          </div>
-        )}
+              );
+            })}
+          </tbody>
+        </table>
       </div>
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <span className="text-sm text-gray-600">
-              Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, filteredAndSortedTasks.length)} of {filteredAndSortedTasks.length} results
-            </span>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="secondary"
-              size="small"
-              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-              disabled={currentPage === 1}
-            >
-              Previous
-            </Button>
-            
-            <div className="flex space-x-1">
-              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                const page = i + 1;
-                return (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`px-3 py-1 text-sm rounded ${
-                      currentPage === page
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-                    }`}
-                  >
-                    {page}
-                  </button>
-                );
-              })}
+        <div className="px-4 py-3 border-t border-gray-200">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="text-sm text-gray-700">
+              Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} to{' '}
+              {Math.min(currentPage * ITEMS_PER_PAGE, filteredAndSortedTasks.length)} of{' '}
+              {filteredAndSortedTasks.length} results
             </div>
             
-            <Button
-              variant="secondary"
-              size="small"
-              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-              disabled={currentPage === totalPages}
-            >
-              Next
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+              >
+                Previous
+              </Button>
+              
+              <div className="flex items-center gap-1">
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  const page = i + 1;
+                  return (
+                    <Button
+                      key={page}
+                      variant={currentPage === page ? 'primary' : 'outline'}
+                      size="sm"
+                      onClick={() => setCurrentPage(page)}
+                      className="w-8 h-8 p-0"
+                    >
+                      {page}
+                    </Button>
+                  );
+                })}
+              </div>
+              
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+              >
+                Next
+              </Button>
+            </div>
           </div>
+        </div>
+      )}
+
+      {/* Empty state */}
+      {paginatedTasks.length === 0 && (
+        <div className="p-8 text-center">
+          <div className="text-gray-400 mb-4">
+            <Search className="w-12 h-12 mx-auto" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No tasks found</h3>
+          <p className="text-gray-500">
+            {filterConfig.search || filterConfig.status !== 'all' || filterConfig.dateRange !== 'all'
+              ? 'Try adjusting your filters to see more results.'
+              : 'Start by creating your first crawl task.'}
+          </p>
         </div>
       )}
     </div>

@@ -217,6 +217,26 @@ export class ApiService {
     return response.data;
   }
 
+  // Bulk export with POST request and blob response
+  async bulkExport(url: string, data: any, filename: string): Promise<Blob> {
+    const response = await this.client.post(url, data, {
+      responseType: 'blob',
+    });
+
+    // Trigger download
+    const blob = new Blob([response.data]);
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(downloadUrl);
+
+    return blob;
+  }
+
   // Health check
   async healthCheck(): Promise<{ status: string; timestamp: string }> {
     return this.get('/health');

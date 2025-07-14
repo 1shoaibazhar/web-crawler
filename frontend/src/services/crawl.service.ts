@@ -134,26 +134,12 @@ export class CrawlService {
 
   async bulkExport(taskIds: number[], format: 'csv' | 'json' | 'xlsx' = 'csv'): Promise<Blob> {
     try {
-      const response = await apiService.client.post(
+      const response = await apiService.bulkExport(
         `/api/v1/crawl/bulk-export?format=${format}`,
         { taskIds } as BulkActionRequest,
-        {
-          responseType: 'blob',
-        }
+        `bulk-crawl-results.${format}`
       );
-
-      // Trigger download
-      const blob = new Blob([response.data]);
-      const downloadUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = downloadUrl;
-      link.download = `bulk-crawl-results.${format}`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(downloadUrl);
-
-      return blob;
+      return response;
     } catch (error) {
       throw error;
     }

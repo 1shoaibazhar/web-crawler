@@ -12,9 +12,4 @@ CREATE TABLE crawl_tasks (
     completed_at TIMESTAMP NULL,
     
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-
--- Create indexes for better performance
-CREATE INDEX idx_crawl_tasks_user_id ON crawl_tasks(user_id);
-CREATE INDEX idx_crawl_tasks_status ON crawl_tasks(status);
-CREATE INDEX idx_crawl_tasks_created_at ON crawl_tasks(created_at); 
+); 
